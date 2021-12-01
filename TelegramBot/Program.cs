@@ -9,14 +9,30 @@ using Telegram.Bot.Exceptions;
 
 namespace TelegramBot
 {
-    class Program
+    public static class Program
     {
-        static void Main(string[] args)
+        private static TelegramBotClient botClient;
+        public static async Task Main()
         {
-            Worker();
+            //            Worker();
+            botClient = new TelegramBotClient("2142968090:AAGoUGYNrs7xMGt-n5apOkGD6Xw2128NRGE");
+
+            User me = await botClient.GetMeAsync();
+            Console.Title = me.Username ?? "My awesome telegram bot";
+
+            using CancellationTokenSource cts = new CancellationTokenSource();
+
+            ReceiverOptions receiverOption = new ReceiverOptions { AllowedUpdates = { } };
+
+            botClient.StartReceiving(HandleUpdateAsync, HandleErrorAsync, receiverOption, cts.Token);
+            
+            Console.WriteLine($"Start listening for @{me.Username}");
+            Console.ReadLine();
+            cts.Cancel();
+
         }
 
-        static async void Worker()
+        static void Worker()
         {
             TelegramBotClient botClient = new TelegramBotClient("2142968090:AAGoUGYNrs7xMGt-n5apOkGD6Xw2128NRGE");
 
@@ -24,14 +40,13 @@ namespace TelegramBot
             var receiverOption = new ReceiverOptions { AllowedUpdates = { } };
 
             botClient.StartReceiving(HandleUpdateAsync, HandleErrorAsync, receiverOption, cancellationToken: cts.Token);
-
             //User me = await botClient.GetMeAsync();
             //Console.WriteLine($"Start listening for @{me.Username}");
             Console.ReadLine();
             cts.Cancel();
         }
 
-        static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+        public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             if (update.Type != UpdateType.Message)
             {
@@ -54,14 +69,16 @@ namespace TelegramBot
                 cancellationToken: cancellationToken);
         }
 
-        static Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
+        public static Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
             var ErrorMessage = exception switch
             {
                 ApiRequestException apiRequestException => $"Telegram API Error:\n[{apiRequestException.ErrorCode}]\n{apiRequestException.Message}",
                 _ => exception.ToString()
             };
+            
             Console.WriteLine(ErrorMessage);
+            
             return Task.CompletedTask;
         }
     }
