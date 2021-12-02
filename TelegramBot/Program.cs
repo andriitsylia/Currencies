@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
@@ -22,7 +23,7 @@ namespace TelegramBot
             client = new HttpClient();
             //client.BaseAddress = new Uri("https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5"); // cash
             //client.BaseAddress = new Uri("https://api.privatbank.ua/p24api/pubinfo?exchange&json&coursid=11"); // non cash
-            client.BaseAddress = new Uri("https://api.privatbank.ua/p24api/exchange_rates?json&date=01.12.2014"); // archive
+            client.BaseAddress = new Uri("https://api.privatbank.ua/p24api/exchange_rates?json&date=02.12.2021"); // archive
 
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
@@ -32,6 +33,29 @@ namespace TelegramBot
             {
                 string s = await httpResponseMessage.Content.ReadAsStringAsync();
                 Console.WriteLine(s);
+                Console.WriteLine("----------");
+
+                using JsonDocument doc = JsonDocument.Parse(s);
+                JsonElement root = doc.RootElement;
+                Console.WriteLine(root);
+                Console.WriteLine("----------");
+
+                JsonElement er = root.GetProperty("exchangeRate");
+                Console.WriteLine(er);
+                Console.WriteLine("----------");
+
+                using JsonDocument doc2 = JsonDocument.Parse(er.ToString());
+                JsonElement root2 = doc2.RootElement;
+                 
+                foreach (var r in root2.EnumerateArray())
+                {
+                    Console.WriteLine(r);
+                    foreach (var item in r.EnumerateObject())
+                    {
+                        Console.WriteLine($"{item.Name}: {item.Value}");
+                    }
+                }
+                Console.WriteLine(root2.GetArrayLength());
             }
 
             User me = await botClient.GetMeAsync();
@@ -57,7 +81,7 @@ namespace TelegramBot
             var receiverOption = new ReceiverOptions { AllowedUpdates = { } };
 
             botClient.StartReceiving(HandleUpdateAsync, HandleErrorAsync, receiverOption, cancellationToken: cts.Token);
-            //User me = await botClient.GetMeAsync();
+            //Useнр me = await botClient.GetMeAsync();
             //Console.WriteLine($"Start listening for @{me.Username}");
             Console.ReadLine();
             cts.Cancel();
@@ -150,18 +174,18 @@ namespace TelegramBot
             //    }
             //);
 
-    //        InlineKeyboardMarkup inlineKeyboard = new(new[]
-    //{
-    //    InlineKeyboardButton.WithSwitchInlineQuery("switch_inline_query"),
-    //    InlineKeyboardButton.WithSwitchInlineQueryCurrentChat("switch_inline_query_current_chat"),
-    //}
-//);
+            //        InlineKeyboardMarkup inlineKeyboard = new(new[]
+            //{
+            //    InlineKeyboardButton.WithSwitchInlineQuery("switch_inline_query"),
+            //    InlineKeyboardButton.WithSwitchInlineQueryCurrentChat("switch_inline_query_current_chat"),
+            //}
+            //);
 
-//            Message sentMessage = await botClient.SendTextMessageAsync(
-//                chatId: chatId,
-//                text: "Removing keyboard",
-//                replyMarkup: inlineKeyboard,
-//                cancellationToken: cancellationToken);
+            //            Message sentMessage = await botClient.SendTextMessageAsync(
+            //                chatId: chatId,
+            //                text: "Removing keyboard",
+            //                replyMarkup: inlineKeyboard,
+            //                cancellationToken: cancellationToken);
 
 
 
