@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
@@ -13,10 +14,25 @@ namespace TelegramBot
     public static class Program
     {
         private static TelegramBotClient botClient;
+        private static HttpClient client;
         public static async Task Main()
         {
             //            Worker();
             botClient = new TelegramBotClient("2142968090:AAGoUGYNrs7xMGt-n5apOkGD6Xw2128NRGE");
+            client = new HttpClient();
+            //client.BaseAddress = new Uri("https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5"); // cash
+            //client.BaseAddress = new Uri("https://api.privatbank.ua/p24api/pubinfo?exchange&json&coursid=11"); // non cash
+            client.BaseAddress = new Uri("https://api.privatbank.ua/p24api/exchange_rates?json&date=01.12.2014"); // archive
+
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+            HttpResponseMessage httpResponseMessage = await client.GetAsync(client.BaseAddress);
+            if (httpResponseMessage.IsSuccessStatusCode)
+            {
+                string s = await httpResponseMessage.Content.ReadAsStringAsync();
+                Console.WriteLine(s);
+            }
 
             User me = await botClient.GetMeAsync();
             Console.Title = me.Username ?? "My awesome telegram bot";
@@ -24,7 +40,7 @@ namespace TelegramBot
             using CancellationTokenSource cts = new CancellationTokenSource();
 
             ReceiverOptions receiverOption = new ReceiverOptions { AllowedUpdates = { } };
-
+            
             botClient.StartReceiving(HandleUpdateAsync, HandleErrorAsync, receiverOption, cts.Token);
 
             Console.WriteLine($"Start listening for @{me.Username}");
@@ -64,10 +80,10 @@ namespace TelegramBot
 
             Console.WriteLine($"Received a '{messageText}' message in chat {chatId}");
 
-            //Message sentMessage = await botClient.SendTextMessageAsync(
-            //    chatId: chatId,
-            //    text: "*You said*:\n" + messageText,
-            //    cancellationToken: cancellationToken);
+            Message sentMessage = await botClient.SendTextMessageAsync(
+                chatId: chatId,
+                text: "*You said*:\n" + messageText,
+                cancellationToken: cancellationToken);
 
             //Message sentMessage = await botClient.SendTextMessageAsync(
             //    chatId: chatId,
@@ -134,18 +150,18 @@ namespace TelegramBot
             //    }
             //);
 
-            InlineKeyboardMarkup inlineKeyboard = new(new[]
-    {
-        InlineKeyboardButton.WithSwitchInlineQuery("switch_inline_query"),
-        InlineKeyboardButton.WithSwitchInlineQueryCurrentChat("switch_inline_query_current_chat"),
-    }
-);
+    //        InlineKeyboardMarkup inlineKeyboard = new(new[]
+    //{
+    //    InlineKeyboardButton.WithSwitchInlineQuery("switch_inline_query"),
+    //    InlineKeyboardButton.WithSwitchInlineQueryCurrentChat("switch_inline_query_current_chat"),
+    //}
+//);
 
-            Message sentMessage = await botClient.SendTextMessageAsync(
-                chatId: chatId,
-                text: "Removing keyboard",
-                replyMarkup: inlineKeyboard,
-                cancellationToken: cancellationToken);
+//            Message sentMessage = await botClient.SendTextMessageAsync(
+//                chatId: chatId,
+//                text: "Removing keyboard",
+//                replyMarkup: inlineKeyboard,
+//                cancellationToken: cancellationToken);
 
 
 
