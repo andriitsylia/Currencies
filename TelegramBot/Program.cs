@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
@@ -9,54 +10,72 @@ using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
+using TelegramBot.Models;
+using TelegramBot.Services;
 
 namespace TelegramBot
 {
     public static class Program
     {
         private static TelegramBotClient botClient;
-        private static HttpClient client;
+
         public static async Task Main()
         {
-            //            Worker();
             botClient = new TelegramBotClient("2142968090:AAGoUGYNrs7xMGt-n5apOkGD6Xw2128NRGE");
-            client = new HttpClient();
-            //client.BaseAddress = new Uri("https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5"); // cash
-            //client.BaseAddress = new Uri("https://api.privatbank.ua/p24api/pubinfo?exchange&json&coursid=11"); // non cash
-            client.BaseAddress = new Uri("https://api.privatbank.ua/p24api/exchange_rates?json&date=02.12.2021"); // archive
 
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            //GetExchangeRateFromBank ratePrivatBank = new(Bank.PrivatBank.ToString());
+            //Task<string> jsonPrivatBankRate = ratePrivatBank.GetPerDateAsJson(new DateTime(2021, 12, 03));
+            //Task<string> jsonPrivatBankRate = ratePrivatBank.GetCashAsJson();
 
-            HttpResponseMessage httpResponseMessage = await client.GetAsync(client.BaseAddress);
-            if (httpResponseMessage.IsSuccessStatusCode)
-            {
-                string s = await httpResponseMessage.Content.ReadAsStringAsync();
-                Console.WriteLine(s);
-                Console.WriteLine("----------");
+            //Console.WriteLine(jsonPrivatBankRate.Result);
+            //Console.WriteLine("----------");
 
-                using JsonDocument doc = JsonDocument.Parse(s);
-                JsonElement root = doc.RootElement;
-                Console.WriteLine(root);
-                Console.WriteLine("----------");
+            //using JsonDocument doc = JsonDocument.Parse(jsonPrivatBankRate.Result);
+            //JsonElement root = doc.RootElement;
+            //Console.WriteLine(root);
+            //PBExchangeRatePerDateList privatBankExchangeRatePerDate;
+            //privatBankExchangeRatePerDate = JsonSerializer.Deserialize<PBExchangeRatePerDateList>(root.ToString());
+            //PBExchangeRateList pBExchangeRateList = new();
+            //pBExchangeRateList.Rates = new();
 
-                JsonElement er = root.GetProperty("exchangeRate");
-                Console.WriteLine(er);
-                Console.WriteLine("----------");
+            //for (int i = 0; i < root.GetArrayLength(); i++)
+            //{
+            //    Console.WriteLine(root[i].ToString());
+            //    PBExchangeRate rate = new();
+            //    rate = JsonSerializer.Deserialize<PBExchangeRate>(root[i].ToString());
+            //    pBExchangeRateList.Rates.Add(rate);
+            //    //Console.WriteLine(rate.ccy);
+            //    //Console.WriteLine(rate.base_ccy);
+            //    //Console.WriteLine(rate.buy);
+            //    //Console.WriteLine(rate.sale);
+            //    //Console.WriteLine("*****");
+            //}
+            //PBExchangeRate rate1 = PBExchangeRateNow.GetFor("BTC", pBExchangeRateList);
 
-                using JsonDocument doc2 = JsonDocument.Parse(er.ToString());
-                JsonElement root2 = doc2.RootElement;
-                 
-                foreach (var r in root2.EnumerateArray())
-                {
-                    Console.WriteLine(r);
-                    foreach (var item in r.EnumerateObject())
-                    {
-                        Console.WriteLine($"{item.Name}: {item.Value}");
-                    }
-                }
-                Console.WriteLine(root2.GetArrayLength());
-            }
+            //Console.WriteLine(rate1.ccy);
+            //Console.WriteLine(rate1.base_ccy);
+            //Console.WriteLine(rate1.buy);
+            //Console.WriteLine(rate1.sale);
+            //Console.WriteLine("*****");
+            //Console.WriteLine("----------");
+
+            //JsonElement er = root.GetProperty("exchangeRate");
+            //Console.WriteLine(er);
+            //Console.WriteLine("----------");
+
+            //using JsonDocument doc2 = JsonDocument.Parse(er.ToString());
+            //JsonElement root2 = doc2.RootElement;
+
+            //foreach (var r in root2.EnumerateArray())
+            //{
+            //    Console.WriteLine(r);
+            //    foreach (var item in r.EnumerateObject())
+            //    {
+            //        Console.WriteLine($"{item.Name}: {item.Value}");
+            //    }
+            //}
+            //Console.WriteLine(root2.GetArrayLength());
+            
 
             User me = await botClient.GetMeAsync();
             Console.Title = me.Username ?? "My awesome telegram bot";
@@ -64,31 +83,43 @@ namespace TelegramBot
             using CancellationTokenSource cts = new CancellationTokenSource();
 
             ReceiverOptions receiverOption = new ReceiverOptions { AllowedUpdates = { } };
-            
+
             botClient.StartReceiving(HandleUpdateAsync, HandleErrorAsync, receiverOption, cts.Token);
 
             Console.WriteLine($"Start listening for @{me.Username}");
-            Console.ReadLine();
-            cts.Cancel();
-
-        }
-
-        static void Worker()
-        {
-            TelegramBotClient botClient = new TelegramBotClient("2142968090:AAGoUGYNrs7xMGt-n5apOkGD6Xw2128NRGE");
-
-            using CancellationTokenSource cts = new CancellationTokenSource();
-            var receiverOption = new ReceiverOptions { AllowedUpdates = { } };
-
-            botClient.StartReceiving(HandleUpdateAsync, HandleErrorAsync, receiverOption, cancellationToken: cts.Token);
-            //Useнр me = await botClient.GetMeAsync();
-            //Console.WriteLine($"Start listening for @{me.Username}");
             Console.ReadLine();
             cts.Cancel();
         }
 
         public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
+            Console.WriteLine("Update type is " + update.Type.ToString());
+            Message sentMessage;
+
+            
+            if (update.Type == UpdateType.CallbackQuery)
+            {
+                Console.WriteLine("InlineMessageId is " + update.CallbackQuery.Data);
+                switch (update.CallbackQuery.Data)
+                {
+                    case "11":
+                        //sentMessage = await botClient.SendTextMessageAsync(
+                        //    chatId: update.Message.Chat.Id,
+                        //    text: update.Message.Text,
+                        //    replyMarkup: inlineKeyboard,
+                        //    cancellationToken: cancellationToken);
+                        //break;
+
+                    case "22":
+                        sentMessage = await botClient.EditMessageReplyMarkupAsync(
+                            update.CallbackQuery.Message.Chat.Id,
+                            update.CallbackQuery.Message.MessageId,
+                            replyMarkup: null,
+                            cancellationToken: cancellationToken);
+                        break;
+                }
+            }
+
             if (update.Type != UpdateType.Message)
             {
                 return;
@@ -101,13 +132,86 @@ namespace TelegramBot
 
             var chatId = update.Message.Chat.Id;
             var messageText = update.Message.Text;
+            ReplyKeyboardMarkup replyKeyboardMarkup;
+            InlineKeyboardMarkup inlineKeyboard = new(new[]
+                        {
+                            new []
+                            {
+                                InlineKeyboardButton.WithCallbackData(text: "1.1", callbackData: "11"),
+                                InlineKeyboardButton.WithCallbackData(text: "1.2", callbackData: "12"),
+                            },
+                            new []
+                            {
+                                InlineKeyboardButton.WithCallbackData(text: "2.1", callbackData: "21"),
+                                InlineKeyboardButton.WithCallbackData(text: "2.2", callbackData: "22"),
+                            },
+                        });
+
+
+            switch (messageText)
+            {
+                case "/start":
+                case "/bank":
+                    replyKeyboardMarkup = new(new[]
+                    { 
+                        new KeyboardButton[] {"PrivatBank"}
+                    })
+                    {
+                        ResizeKeyboard = true
+                    };
+
+                    sentMessage = await botClient.SendTextMessageAsync(
+                        chatId: chatId,
+                        text: "Choose the bank",
+                        replyMarkup: replyKeyboardMarkup,
+                        cancellationToken: cancellationToken);
+                    break;
+
+                case "/privatbank":
+                case "PrivatBank":
+                    
+                    List<string> list = new GetCurrencyListFromBank(Bank.PrivatBank).Currency;
+                    PBReportMessage report = new PBReportMessage();
+                    string s = report.CurrencyList(list);
+                    sentMessage = await botClient.SendTextMessageAsync(
+                        chatId: chatId,
+                        text: s,
+                        cancellationToken: cancellationToken);
+                    //sentMessage = await botClient.SendTextMessageAsync(
+                    //    chatId: chatId,
+                    //    text: "Enter the currency and date in dd.mm.yyyy format",
+                    //    cancellationToken: cancellationToken);
+                    break;
+
+                case "/inline":
+                    sentMessage = await botClient.SendTextMessageAsync(
+                        chatId: chatId,
+                        text: messageText,
+                        replyMarkup: inlineKeyboard,
+                        cancellationToken: cancellationToken);
+                    break;
+
+                case "/removekeyboard":
+                    sentMessage = await botClient.SendTextMessageAsync(
+                        chatId: chatId,
+                        text: messageText,
+                        replyMarkup: new ReplyKeyboardRemove(),
+                        cancellationToken: cancellationToken);
+                    break;
+
+                default:
+
+                    break;
+
+            }
+
 
             Console.WriteLine($"Received a '{messageText}' message in chat {chatId}");
 
-            Message sentMessage = await botClient.SendTextMessageAsync(
-                chatId: chatId,
-                text: "*You said*:\n" + messageText,
-                cancellationToken: cancellationToken);
+            //Message sentMessage = await botClient.SendTextMessageAsync(
+            //    chatId: chatId,
+            //    text: "*You said*:\n" + messageText,
+            //    cancellationToken: cancellationToken);
 
             //Message sentMessage = await botClient.SendTextMessageAsync(
             //    chatId: chatId,
@@ -133,7 +237,7 @@ namespace TelegramBot
 
             //Message sentMessage = await botClient.SendTextMessageAsync(
             //    chatId: chatId,
-            //    text: "Choose a response",
+            //    text: messageText,
             //    replyMarkup: replyKeyboardMarkup,
             //    cancellationToken: cancellationToken);
 
@@ -149,9 +253,9 @@ namespace TelegramBot
             //    replyMarkup: replyKeyboardMarkup,
             //    cancellationToken: cancellationToken);
 
-            //        InlineKeyboardMarkup inlineKeyboard = new(new[]
-            //{
-            //    // first row
+    //        InlineKeyboardMarkup inlineKeyboard = new(new[]
+    //{
+    //            // first row
             //    new []
             //    {
             //        InlineKeyboardButton.WithCallbackData(text: "1.1", callbackData: "11"),
@@ -181,11 +285,11 @@ namespace TelegramBot
             //}
             //);
 
-            //            Message sentMessage = await botClient.SendTextMessageAsync(
-            //                chatId: chatId,
-            //                text: "Removing keyboard",
-            //                replyMarkup: inlineKeyboard,
-            //                cancellationToken: cancellationToken);
+            //Message sentMessage = await botClient.SendTextMessageAsync(
+            //    chatId: chatId,
+            //    text: messageText,
+            //    replyMarkup: inlineKeyboard,
+            //    cancellationToken: cancellationToken);
 
 
 
