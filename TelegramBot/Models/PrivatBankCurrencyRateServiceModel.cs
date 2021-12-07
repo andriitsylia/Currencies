@@ -46,14 +46,8 @@ namespace TelegramBot.Models
             _date = currencyRates.date;
             _baseCurrency = currencyRates.baseCurrencyLit;
             _currency = currency.ToString();
-            (_purchaseRate, _saleRate) = Get();
-        }
-
-        private (string pRate, string sRate) Get()
-        {
-            PrivatBankCurrencyRateSourceModel currencyRate;
-            currencyRate = _currencyRates.exchangeRate.Where(c => c.currency == _currency).Single();
-            return (currencyRate.purchaseRate.ToString(), currencyRate.saleRate.ToString());
+            _purchaseRate = _currencyRates.exchangeRate.Where(c => c.currency == _currency).Single().purchaseRate.ToString();
+            _saleRate = _currencyRates.exchangeRate.Where(c => c.currency == _currency).Single().saleRate.ToString();
         }
     }
 }

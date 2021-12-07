@@ -23,6 +23,7 @@ namespace TelegramBot
         {
             botClient = new TelegramBotClient("2142968090:AAGoUGYNrs7xMGt-n5apOkGD6Xw2128NRGE");
 
+
             //GetExchangeRateFromBank ratePrivatBank = new(Bank.PrivatBank.ToString());
             //Task<string> jsonPrivatBankRate = ratePrivatBank.GetPerDateAsJson(new DateTime(2021, 12, 03));
             //Task<string> jsonPrivatBankRate = ratePrivatBank.GetCashAsJson();
@@ -91,6 +92,30 @@ namespace TelegramBot
             cts.Cancel();
         }
 
+        public static async Task CallbackQueryHandler(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+        {
+            Message sentMessage;
+            Console.WriteLine("InlineMessageId is " + update.CallbackQuery.Data);
+            switch (update.CallbackQuery.Data)
+            {
+                case "11":
+                //sentMessage = await botClient.SendTextMessageAsync(
+                //    chatId: update.Message.Chat.Id,
+                //    text: update.Message.Text,
+                //    replyMarkup: inlineKeyboard,
+                //    cancellationToken: cancellationToken);
+                //break;
+
+                case "22":
+                    sentMessage = await botClient.EditMessageReplyMarkupAsync(
+                        update.CallbackQuery.Message.Chat.Id,
+                        update.CallbackQuery.Message.MessageId,
+                        replyMarkup: null,
+                        cancellationToken: cancellationToken);
+                    break;
+            }
+        }
+
         public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             Console.WriteLine("Update type is " + update.Type.ToString());
@@ -99,25 +124,7 @@ namespace TelegramBot
             
             if (update.Type == UpdateType.CallbackQuery)
             {
-                Console.WriteLine("InlineMessageId is " + update.CallbackQuery.Data);
-                switch (update.CallbackQuery.Data)
-                {
-                    case "11":
-                        //sentMessage = await botClient.SendTextMessageAsync(
-                        //    chatId: update.Message.Chat.Id,
-                        //    text: update.Message.Text,
-                        //    replyMarkup: inlineKeyboard,
-                        //    cancellationToken: cancellationToken);
-                        //break;
-
-                    case "22":
-                        sentMessage = await botClient.EditMessageReplyMarkupAsync(
-                            update.CallbackQuery.Message.Chat.Id,
-                            update.CallbackQuery.Message.MessageId,
-                            replyMarkup: null,
-                            cancellationToken: cancellationToken);
-                        break;
-                }
+                await CallbackQueryHandler(botClient, update, cancellationToken);
             }
 
             if (update.Type != UpdateType.Message)
@@ -169,18 +176,18 @@ namespace TelegramBot
 
                 case "/privatbank":
                 case "PrivatBank":
-                    
-                    List<string> list = new GetCurrencyListFromBank(Bank.PrivatBank).Currency;
-                    PBReportMessage report = new PBReportMessage();
-                    string s = report.CurrencyList(list);
+
+                    GetJsonDataFromBank privatBankRates = new(Bank.PrivatBank, "https://api.privatbank.ua/p24api/exchange_rates?json&date=");
+                    string privatBankJsonData = privatBankRates.Get(DateTime.Now).Result;
+                    JsonDocument doc = JsonDocument.Parse(privatBankJsonData);
+                    JsonElement root = doc.RootElement;
+                    PrivatBankCurrencyRatesSourceModel currencyRatesSource = JsonSerializer.Deserialize<PrivatBankCurrencyRatesSourceModel>(root.ToString());
+                    PrivatBankCurrencyListServiceModel privatBankCurrencyList = new(currencyRatesSource);
+
                     sentMessage = await botClient.SendTextMessageAsync(
                         chatId: chatId,
-                        text: s,
+                        text: string.Join(" ", privatBankCurrencyList.Currencies),
                         cancellationToken: cancellationToken);
-                    //sentMessage = await botClient.SendTextMessageAsync(
-                    //    chatId: chatId,
-                    //    text: "Enter the currency and date in dd.mm.yyyy format",
-                    //    cancellationToken: cancellationToken);
                     break;
 
                 case "/inline":

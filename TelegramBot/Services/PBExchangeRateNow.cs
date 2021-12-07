@@ -9,10 +9,9 @@ namespace TelegramBot.Services
 {
     public class PBExchangeRateNow
     {
-
-        public static PBExchangeRate GetFor(string currency, PBExchangeRateList currencyList)
-        {
-            return currencyList.Rates.Where(cur => cur.ccy == currency).Single();
-        }
+        //public static PBExchangeRate GetFor(string currency, PBExchangeRateList currencyList)
+        //{
+        //    return currencyList.Rates.Where(cur => cur.ccy == currency).Single();
+        //}
     }
 }

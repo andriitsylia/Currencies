@@ -27,23 +27,23 @@ namespace TelegramBot.Services
 
         private List<string> Get()
         {
-            GetExchangeRateFromBank rate = new(_bank.ToString());
-            Task<string> jsonRate = rate.GetPerDateAsJson(DateTime.Now);
+            //GetExchangeRateFromBank rate = new(_bank.ToString());
+            //Task<string> jsonRate = rate.GetPerDateAsJson(DateTime.Now);
             
-            using JsonDocument doc = JsonDocument.Parse(jsonRate.Result);
-            JsonElement root = doc.RootElement;
+            //using JsonDocument doc = JsonDocument.Parse(jsonRate.Result);
+            //JsonElement root = doc.RootElement;
             List<string> result = new();
 
-            switch (_bank.ToString())
-            {
-                case "PrivatBank":
-                    PBExchangeRatePerDateList rateList = JsonSerializer.Deserialize<PBExchangeRatePerDateList>(root.ToString());
-                    foreach (PBExchangeRatePerDate item in rateList.exchangeRate)
-                    {
-                        result.Add(item.currency);
-                    }
-                    break;
-            }
+            //switch (_bank.ToString())
+            //{
+            //    case "PrivatBank":
+            //        PBExchangeRatePerDateList rateList = JsonSerializer.Deserialize<PBExchangeRatePerDateList>(root.ToString());
+            //        foreach (PBExchangeRatePerDate item in rateList.exchangeRate)
+            //        {
+            //            result.Add(item.currency);
+            //        }
+            //        break;
+            //}
 
             return result;
         }
