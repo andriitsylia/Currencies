@@ -96,7 +96,7 @@ namespace TelegramBot
         {
             Message sentMessage;
             Console.WriteLine("InlineMessageId is " + update.CallbackQuery.Data);
-            switch (update.CallbackQuery.Data)
+            switch (update.CallbackQuery.Data.Split(" ")[0])
             {
                 case "11":
                 //sentMessage = await botClient.SendTextMessageAsync(
@@ -206,7 +206,7 @@ namespace TelegramBot
                         });
 
 
-                    switch (messageText)
+                    switch (messageText.Split(" ")[0])
                     {
                         case "/start":
                         case "/bank":
