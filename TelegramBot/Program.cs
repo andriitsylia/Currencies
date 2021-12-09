@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -107,9 +108,12 @@ namespace TelegramBot
                         chatId: update.CallbackQuery.Message.Chat.Id,
                         text: "You've entered " + commands[1],
                         cancellationToken: cancellationToken);
+                    await botClient.AnswerCallbackQueryAsync(update.CallbackQuery.Id,
+                        text: "You've entered " + commands[1],
+                        cancellationToken: cancellationToken);
                     break;
 
-                case "/close_currency_keyboardy":
+                case "/hide_currency_keyboard":
                     sentMessage = await botClient.EditMessageReplyMarkupAsync(
                         update.CallbackQuery.Message.Chat.Id,
                         update.CallbackQuery.Message.MessageId,
@@ -119,81 +123,11 @@ namespace TelegramBot
             }
         }
 
-        public static ReplyKeyboardMarkup ReplyCurrencyKeyboard(PrivatBankCurrencyListServiceModel privatBankCurrencyList)
-        {
-            ReplyKeyboardMarkup replyKeyboardMarkup;
-            List<KeyboardButton> row = new();
-            List<List<KeyboardButton>> rows = new();
-            int i = 0;
-            foreach (var currency in privatBankCurrencyList.Currencies)
-            {
-                if (!string.IsNullOrWhiteSpace(currency))
-                {
-                    i++;
-                    if (i <= 10)
-                    {
-                        row.Add(currency);
-                    }
-                    else
-                    {
-                        rows.Add(row);
-                        i = 1;
-                        row = new List<KeyboardButton>();
-                        row.Add(currency);
-                    }
-                }
-            }
-            rows.Add(row);
-
-            replyKeyboardMarkup = new(rows) { ResizeKeyboard = true };
-             return replyKeyboardMarkup;
-        }
-
-        public static ReplyKeyboardMarkup ReplyMainKeyboard()
-        {
-            return new(new[]
-                            {
-                                new KeyboardButton[] {"Banks", "Currency", "Date"},
-                                new KeyboardButton[] {"Currency"},
-                                new KeyboardButton[] {"Date"}
-                            })
-            { ResizeKeyboard = true };
-        }
-
-        public static InlineKeyboardMarkup InlineCurrencyKeyboard(PrivatBankCurrencyListServiceModel privatBankCurrencyList)
-        {
-            InlineKeyboardMarkup inlineKeyboardMarkup;
-            List<InlineKeyboardButton> row = new();
-            List<List<InlineKeyboardButton>> rows = new();
-            foreach (var currency in privatBankCurrencyList.Currencies)
-            {
-                if (!string.IsNullOrWhiteSpace(currency))
-                {
-                    if (row.Count == 6)
-                    {
-                        rows.Add(row);
-                        row = new List<InlineKeyboardButton>();
-                    }
-                    row.Add(InlineKeyboardButton.WithCallbackData(text: currency, callbackData: "/currency " + currency));
-                }
-            }
-            if (row.Count == 6)
-            {
-                rows.Add(row);
-                row = new List<InlineKeyboardButton>();
-            }
-            row.Add(InlineKeyboardButton.WithCallbackData(text: "Close", callbackData: "/close_currency_keyboardy"));
-            rows.Add(row);
-
-            inlineKeyboardMarkup = new(rows);
-            return inlineKeyboardMarkup;
-        }
-
         public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             Console.WriteLine("Update type is " + update.Type.ToString());
             Message sentMessage;
-
+            
             switch (update.Type)
             {
                 case UpdateType.CallbackQuery:
@@ -203,29 +137,14 @@ namespace TelegramBot
                 case UpdateType.Message:
                     var chatId = update.Message.Chat.Id;
                     var messageText = update.Message.Text;
-                    ReplyKeyboardMarkup replyKeyboardMarkup;
-                    InlineKeyboardMarkup inlineKeyboard = new(new[]
-                                {
-                            new []
-                            {
-                                InlineKeyboardButton.WithCallbackData(text: "1.1", callbackData: "11"),
-                                InlineKeyboardButton.WithCallbackData(text: "1.2", callbackData: "12"),
-                            },
-                            new []
-                            {
-                                InlineKeyboardButton.WithCallbackData(text: "2.1", callbackData: "21"),
-                                InlineKeyboardButton.WithCallbackData(text: "2.2", callbackData: "22"),
-                            },
-                        });
-
-
-                    switch (messageText.Split(" ")[0])
+                    string[] commands = messageText.Split(" ");
+                    switch (commands[0])
                     {
                         case "/start":
                             sentMessage = await botClient.SendTextMessageAsync(
                                 chatId: chatId,
                                 text: "Choose the bank, currency and enter the date",
-                                replyMarkup: ReplyMainKeyboard(),
+                                replyMarkup: ReplyKeyboard.ReplyMainKeyboard(),
                                 cancellationToken: cancellationToken);
                             break;
 
@@ -240,53 +159,97 @@ namespace TelegramBot
                         case "Currency":
                         case "/banks":
                         case "Banks":
+                            if (commands.Length < 3)
+                            {
+                                sentMessage = await botClient.SendTextMessageAsync(
+                                   chatId: chatId,
+                                   text: "Parameters is not enough:\r\n/banks date currency",
+                                   replyToMessageId: update.Message.MessageId,
+                                   replyMarkup: null,
+                                   cancellationToken: cancellationToken);
+                            }
+                            else
+                            {
+                                DateTime d;
+                                if (DateTime.TryParse(commands[1], out d))
+                                {
+                                    GetJsonDataFromBank privatBankRates = new(Bank.PrivatBank, "https://api.privatbank.ua/p24api/exchange_rates?json&date=");
+                                    string privatBankJsonData = privatBankRates.Get(d).Result;
+                                    JsonDocument doc = JsonDocument.Parse(privatBankJsonData);
+                                    JsonElement root = doc.RootElement;
+                                    PrivatBankCurrencyRatesSourceModel currencyRatesSource = JsonSerializer.Deserialize<PrivatBankCurrencyRatesSourceModel>(root.ToString());
+                                    PrivatBankCurrencyListServiceModel privatBankCurrencyList = new(currencyRatesSource);
+                                    
+                                    int pos = privatBankCurrencyList.Currencies.IndexOf(commands[2].ToUpper());
 
-                            GetJsonDataFromBank privatBankRates = new(Bank.PrivatBank, "https://api.privatbank.ua/p24api/exchange_rates?json&date=");
-                            string privatBankJsonData = privatBankRates.Get(DateTime.Now).Result;
-                            JsonDocument doc = JsonDocument.Parse(privatBankJsonData);
-                            JsonElement root = doc.RootElement;
-                            PrivatBankCurrencyRatesSourceModel currencyRatesSource = JsonSerializer.Deserialize<PrivatBankCurrencyRatesSourceModel>(root.ToString());
-                            PrivatBankCurrencyListServiceModel privatBankCurrencyList = new(currencyRatesSource);
+                                    if (pos != -1)
+                                    {
+                                        sentMessage = await botClient.SendTextMessageAsync(
+                                           chatId: chatId,
+                                           text: "Please, choose the currency:",
+                                           replyMarkup: ReplyKeyboard.InlineCurrencyKeyboard(privatBankCurrencyList),
+                                           cancellationToken: cancellationToken);
 
-                            //replyKeyboardMarkup = new(new[]
-                            //{
-                            //    new KeyboardButton[] {"PrivatBank"}
-                            //})
-                            //{
-                            //    ResizeKeyboard = true
-                            //};
+                                        Currency c = (Currency)Enum.Parse(typeof(Currency), commands[2].ToUpper());
+                                        PrivatBankCurrencyRateServiceModel privatBankCurrencyRate =
+                                            new PrivatBankCurrencyRateServiceModel(currencyRatesSource, c);
+                                        PrivatBankCurrencyRateReportModel rep = new PrivatBankCurrencyRateReportModel(privatBankCurrencyRate);
+                                        sentMessage = await botClient.SendTextMessageAsync(
+                                            chatId: chatId,
+                                            text: rep.Report,
+                                            replyMarkup: null,
+                                            cancellationToken: cancellationToken);
+                                    }
+                                    else
+                                    {
+                                        sentMessage = await botClient.SendTextMessageAsync(
+                                            chatId: chatId,
+                                            text: "Currency isn't valid or isn't in currency list",
+                                            replyMarkup: null,
+                                            cancellationToken: cancellationToken);
+                                    }
+                                }
+                                else
+                                {
+                                    sentMessage = await botClient.SendTextMessageAsync(
+                                   chatId: chatId,
+                                   text: "Date isn't valid:\r\ndate format is dd.mm.yyyy",
+                                   replyToMessageId: update.Message.MessageId,
+                                   replyMarkup: null,
+                                   cancellationToken: cancellationToken);
+                                }
 
-                            //sentMessage = await botClient.SendTextMessageAsync(
-                            //    chatId: chatId,
-                            //    text: string.Join(" ", privatBankCurrencyList.Currencies),
-                            //    replyMarkup: ReplyCurrencyKeyboard(privatBankCurrencyList),
-                            //    cancellationToken: cancellationToken);
+                                    
 
-                            sentMessage = await botClient.SendTextMessageAsync(
-                               chatId: chatId,
-                               text: "Please, choose the currency:",
-                               replyMarkup: InlineCurrencyKeyboard(privatBankCurrencyList),
-                               cancellationToken: cancellationToken);
-                            break;
+                                
 
-                        case "/inline":
+                                //replyKeyboardMarkup = new(new[]
+                                //{
+                                //    new KeyboardButton[] {"PrivatBank"}
+                                //})
+                                //{
+                                //    ResizeKeyboard = true
+                                //};
 
-                            sentMessage = await botClient.SendTextMessageAsync(
-                                chatId: chatId,
-                                text: messageText,
-                                replyMarkup: inlineKeyboard,
-                                cancellationToken: cancellationToken);
-                            break;
+                                //sentMessage = await botClient.SendTextMessageAsync(
+                                //    chatId: chatId,
+                                //    text: string.Join(" ", privatBankCurrencyList.Currencies),
+                                //    replyMarkup: ReplyCurrencyKeyboard(privatBankCurrencyList),
+                                //    cancellationToken: cancellationToken);
 
-                        case "/removekeyboard":
-                            sentMessage = await botClient.SendTextMessageAsync(
-                                chatId: chatId,
-                                text: messageText,
-                                replyMarkup: new ReplyKeyboardRemove(),
-                                cancellationToken: cancellationToken);
+                            }
+
                             break;
 
                         default:
+                            sentMessage = await botClient.SendTextMessageAsync(
+                        chatId: chatId,
+                        text: "Hi\\! _My name_ is *Andrii*\\! Press [https://www\\.google\\.com]",
+                        parseMode: ParseMode.MarkdownV2,
+                        disableNotification: false,
+                        replyToMessageId: update.Message.MessageId,
+                        replyMarkup: null,
+                        cancellationToken: cancellationToken);
                             break;
                     }
                     Console.WriteLine($"Received a '{messageText}' message in chat {chatId}");
@@ -294,14 +257,10 @@ namespace TelegramBot
                     break;
 
                 default:
+                    
                     break;
             }
 
-
-            //Message sentMessage = await botClient.SendTextMessageAsync(
-            //    chatId: chatId,
-            //    text: "*You said*:\n" + messageText,
-            //    cancellationToken: cancellationToken);
 
             //Message sentMessage = await botClient.SendTextMessageAsync(
             //    chatId: chatId,

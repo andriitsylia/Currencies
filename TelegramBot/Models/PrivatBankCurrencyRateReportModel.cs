@@ -25,8 +25,8 @@ namespace TelegramBot.Models
         private string Create()
         {
             StringBuilder result = new StringBuilder();
-            result.Append($"Курс {_currencyRate.BaseCurrency} у відношенні до {_currencyRate.Currency} cтаном на {_currencyRate.Date} року\r\n");
-            result.Append($"Купівля (Приватбанк): {_currencyRate.PurchaseRate}\r\nПродаж (Приватбанк): {_currencyRate.SaleRate}\r\n");
+            result.Append($"Курс {_currencyRate.Currency} у відношенні до {_currencyRate.BaseCurrency} cтаном на {_currencyRate.Date} року\r\n");
+            result.Append($"Купівля: {_currencyRate.PurchaseRate:C7}\r\nПродаж: {_currencyRate.SaleRate:C7}\r\n");
             return result.ToString();
         }
     }

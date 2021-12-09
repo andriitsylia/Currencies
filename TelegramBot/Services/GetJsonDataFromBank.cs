@@ -26,7 +26,7 @@ namespace TelegramBot.Services
 
         public async Task<string> Get(DateTime date)
         {
-            _client.BaseAddress = new Uri(_connectionAddress + "01.12.2021");//date.Date.ToString(DATE_FORMAT));
+            _client.BaseAddress = new Uri(_connectionAddress + date.Date.ToString(DATE_FORMAT));
             _client.DefaultRequestHeaders.Accept.Clear();
             _client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 
