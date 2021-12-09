@@ -96,17 +96,20 @@ namespace TelegramBot
         {
             Message sentMessage;
             Console.WriteLine("InlineMessageId is " + update.CallbackQuery.Data);
-            switch (update.CallbackQuery.Data.Split(" ")[0])
+            string[] commands = update.CallbackQuery.Data.Split(" ");
+            switch (commands[0])
             {
                 case "11":
-                //sentMessage = await botClient.SendTextMessageAsync(
-                //    chatId: update.Message.Chat.Id,
-                //    text: update.Message.Text,
-                //    replyMarkup: inlineKeyboard,
-                //    cancellationToken: cancellationToken);
-                //break;
+                break;
 
-                case "USD":
+                case "/currency":
+                    sentMessage = await botClient.SendTextMessageAsync(
+                        chatId: update.CallbackQuery.Message.Chat.Id,
+                        text: "You've entered " + commands[1],
+                        cancellationToken: cancellationToken);
+                    break;
+
+                case "/close_currency_keyboardy":
                     sentMessage = await botClient.EditMessageReplyMarkupAsync(
                         update.CallbackQuery.Message.Chat.Id,
                         update.CallbackQuery.Message.MessageId,
@@ -146,30 +149,40 @@ namespace TelegramBot
              return replyKeyboardMarkup;
         }
 
+        public static ReplyKeyboardMarkup ReplyMainKeyboard()
+        {
+            return new(new[]
+                            {
+                                new KeyboardButton[] {"Banks", "Currency", "Date"},
+                                new KeyboardButton[] {"Currency"},
+                                new KeyboardButton[] {"Date"}
+                            })
+            { ResizeKeyboard = true };
+        }
+
         public static InlineKeyboardMarkup InlineCurrencyKeyboard(PrivatBankCurrencyListServiceModel privatBankCurrencyList)
         {
             InlineKeyboardMarkup inlineKeyboardMarkup;
             List<InlineKeyboardButton> row = new();
             List<List<InlineKeyboardButton>> rows = new();
-            int i = 0;
             foreach (var currency in privatBankCurrencyList.Currencies)
             {
                 if (!string.IsNullOrWhiteSpace(currency))
                 {
-                    i++;
-                    if (i <= 6)
-                    {
-                        row.Add(InlineKeyboardButton.WithCallbackData(text: currency, callbackData: currency));
-                    }
-                    else
+                    if (row.Count == 6)
                     {
                         rows.Add(row);
-                        i = 1;
                         row = new List<InlineKeyboardButton>();
-                        row.Add(currency);
                     }
+                    row.Add(InlineKeyboardButton.WithCallbackData(text: currency, callbackData: "/currency " + currency));
                 }
             }
+            if (row.Count == 6)
+            {
+                rows.Add(row);
+                row = new List<InlineKeyboardButton>();
+            }
+            row.Add(InlineKeyboardButton.WithCallbackData(text: "Close", callbackData: "/close_currency_keyboardy"));
             rows.Add(row);
 
             inlineKeyboardMarkup = new(rows);
@@ -185,7 +198,7 @@ namespace TelegramBot
             {
                 case UpdateType.CallbackQuery:
                     await CallbackQueryHandler(botClient, update, cancellationToken);
-                    break;
+                break;
 
                 case UpdateType.Message:
                     var chatId = update.Message.Chat.Id;
@@ -209,8 +222,14 @@ namespace TelegramBot
                     switch (messageText.Split(" ")[0])
                     {
                         case "/start":
-                        case "/bank":
+                            sentMessage = await botClient.SendTextMessageAsync(
+                                chatId: chatId,
+                                text: "Choose the bank, currency and enter the date",
+                                replyMarkup: ReplyMainKeyboard(),
+                                cancellationToken: cancellationToken);
+                            break;
 
+                        case "/bank":
                             sentMessage = await botClient.SendTextMessageAsync(
                                 chatId: chatId,
                                 text: "Choose the bank",
@@ -218,8 +237,9 @@ namespace TelegramBot
                                 cancellationToken: cancellationToken);
                             break;
 
-                        case "/privatbank":
-                        case "PrivatBank":
+                        case "Currency":
+                        case "/banks":
+                        case "Banks":
 
                             GetJsonDataFromBank privatBankRates = new(Bank.PrivatBank, "https://api.privatbank.ua/p24api/exchange_rates?json&date=");
                             string privatBankJsonData = privatBankRates.Get(DateTime.Now).Result;
