@@ -10,12 +10,13 @@ namespace TelegramBot.Services
 {
     public class ReplyKeyboard
     {
-
+        private const int BUTTONS_IN_ROW = 5;
         public static ReplyKeyboardMarkup ReplyMainKeyboard()
         {
             return new(new[]
             {
-                new KeyboardButton[] {"Banks", "Currency", "Date"}
+                new KeyboardButton[] {"Banks", "Currency", "Date"},
+                new KeyboardButton[]{"Hide main keyboard"}
             })
             { ResizeKeyboard = true };
         }
@@ -24,21 +25,21 @@ namespace TelegramBot.Services
         {
             ReplyKeyboardMarkup replyKeyboardMarkup;
             List<KeyboardButton> row = new();
-            List<List<KeyboardButton>> rows = new();
+            List<List<KeyboardButton>> keyboard = new();
             foreach (var currency in privatBankCurrencyList.Currencies)
             {
                 if (!string.IsNullOrWhiteSpace(currency))
                 {
-                    if (row.Count == 5)
+                    if (row.Count == BUTTONS_IN_ROW)
                     {
-                        rows.Add(row);
+                        keyboard.Add(row);
                         row = new List<KeyboardButton>();
                     }
                     row.Add(currency);
                 }
             }
-            rows.Add(row);
-            replyKeyboardMarkup = new(rows) { ResizeKeyboard = true };
+            keyboard.Add(row);
+            replyKeyboardMarkup = new(keyboard) { ResizeKeyboard = true };
 
             return replyKeyboardMarkup;
         }
@@ -47,24 +48,24 @@ namespace TelegramBot.Services
         {
             InlineKeyboardMarkup inlineKeyboardMarkup;
             List<InlineKeyboardButton> row = new();
-            List<List<InlineKeyboardButton>> rows = new();
+            List<List<InlineKeyboardButton>> keyboard = new();
             foreach (var currency in privatBankCurrencyList.Currencies)
             {
                 if (!string.IsNullOrWhiteSpace(currency))
                 {
-                    if (row.Count == 5)
+                    if (row.Count == BUTTONS_IN_ROW)
                     {
-                        rows.Add(row);
+                        keyboard.Add(row);
                         row = new List<InlineKeyboardButton>();
                     }
                     row.Add(InlineKeyboardButton.WithCallbackData(text: currency, callbackData: "/currency " + currency));
                 }
             }
-            rows.Add(row);
+            keyboard.Add(row);
             row = new List<InlineKeyboardButton>();
             row.Add(InlineKeyboardButton.WithCallbackData(text: "Hide currency keyboard", callbackData: "/hide_currency_keyboard"));
-            rows.Add(row);
-            inlineKeyboardMarkup = new(rows);
+            keyboard.Add(row);
+            inlineKeyboardMarkup = new(keyboard);
 
             return inlineKeyboardMarkup;
         }
