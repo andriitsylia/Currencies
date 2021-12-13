@@ -25,6 +25,11 @@ namespace TelegramBot
         static IConfiguration mainSettings;
         static string token;
         static List<Bank> banks;
+        static Bank currentBank;
+        static DateTime currentDate;
+        static string currentCurrency;
+        static PrivatBankRatesSourceModel currencyRatesSource;
+        static PrivatBankCurrencyListServiceModel currencyList;
 
         public static async Task Main()
         {
@@ -47,7 +52,7 @@ namespace TelegramBot
             User me = await botClient.GetMeAsync();
             Console.Title = me.Username ?? "My awesome telegram bot";
 
-            ReceiverOptions receiverOption = new ReceiverOptions { AllowedUpdates = { } };
+            ReceiverOptions receiverOption = new ReceiverOptions { AllowedUpdates = { }, ThrowPendingUpdates = true };
 
             botClient.StartReceiving(HandleUpdateAsync, HandleErrorAsync, receiverOption, cts.Token);
             Console.WriteLine($"Start listening for @{me.Username}");
@@ -91,37 +96,136 @@ namespace TelegramBot
             switch (command[0])
             {
                 case "/start":
-                    sentMessage = await botClient.SendTextMessageAsync(
-                        chatId: chatId,
-                        text: "Choose the bank",
-                        replyMarkup: ReplyKeyboard.ReplyMainKeyboard(),
-                        cancellationToken: cancellationToken);
-                    break;
-
-                case "/bank":
                     StringBuilder message = new();
-                    message.Append("*Please, make a choice*:\r\n");
+                    message.Append("*Please, choose the bank*:\r\n");
                     foreach (var bank in banks)
                     {
                         message.Append(bank.Name + "\r\n");
                     }
-                    message.Append("\r\n*Usage*: /bank \\<_Bank_\\>");
+                    message.Append("\r\n*Usage*: /bank _Bank_");
                     sentMessage = await botClient.SendTextMessageAsync(
                         chatId: chatId,
                         text: message.ToString(),
                         parseMode: ParseMode.MarkdownV2,
-                        //replyMarkup: replyKeyboardMarkup,
                         cancellationToken: cancellationToken);
                     break;
 
-                case "Currency":
-                case "Banks":
-                    sentMessage = await botClient.SendTextMessageAsync(
+                case "/bank":
+                    if ((command.Length < 2))// || (string.IsNullOrWhiteSpace(command[1])))
+                    {
+                        sentMessage = await botClient.SendTextMessageAsync(
+                            chatId: chatId,
+                            text: " * Please, choose the bank *:\r\n\r\n*Usage*: /bank _Bank_",
+                            parseMode: ParseMode.MarkdownV2,
+                            cancellationToken: cancellationToken);
+                        break;
+                    } 
+                    currentBank = banks.Find(b=>b.Name.ToUpper() == command[1].ToUpper());
+                    if (currentBank != null)
+                    {
+                        sentMessage = await botClient.SendTextMessageAsync(
+                        chatId: chatId,
+                        text: "You choose the *" + currentBank.Name + "*\\.\r\n\r\nEnter the date: \r\n\r\n*Usage*: /date _Date_ \\(in _*dd\\.mm\\.yyyy*_ format\\)",
+                        parseMode: ParseMode.MarkdownV2,
+                        cancellationToken: cancellationToken);
+                    }
+                    else
+                    {
+                        sentMessage = await botClient.SendTextMessageAsync(
+                            chatId: chatId,
+                            text: "*" + command[1] + "* is not in the list\\.",
+                            parseMode: ParseMode.MarkdownV2,
+                            cancellationToken: cancellationToken);
+                    }
+                    break;
+                    
+                case "/date":
+                    if ((command.Length < 2))// || (string.IsNullOrWhiteSpace(command[1])))
+                    {
+                        sentMessage = await botClient.SendTextMessageAsync(
+                            chatId: chatId,
+                            text: "*Please, enter the date*:\r\n\r\n*Usage*: /date _Date_ \\(in _*dd\\.mm\\.yyyy*_ format\\)",
+                            parseMode: ParseMode.MarkdownV2,
+                            cancellationToken: cancellationToken);
+                        break;
+                    }
+                    
+                    if (DateTime.TryParse(command[1], out currentDate))
+                    {
+                        sentMessage = await botClient.SendTextMessageAsync(
+                        chatId: chatId,
+                        text: currentDate.ToString("dd.MM.yyyy"),
+                        cancellationToken: cancellationToken);
+
+                        GetJsonDataFromBank bankRates = new(currentBank);
+                        string bankJsonData = bankRates.Get(currentDate).Result;
+                        JsonDocument doc = JsonDocument.Parse(bankJsonData);
+                        JsonElement root = doc.RootElement;
+                        foreach (var bank in banks)
+                        {
+                            if (bank.Name == currentBank.Name)
+                            {
+                                currencyRatesSource = JsonSerializer.Deserialize<PrivatBankRatesSourceModel>(root.ToString());
+                                currencyList = new(currencyRatesSource);
+                                break;
+                            }
+                        }
+                        sentMessage = await botClient.SendTextMessageAsync(
                            chatId: chatId,
-                           text: "Parameters is not enough:\r\n/banks date currency",
-                           replyToMessageId: update.Message.MessageId,
-                           replyMarkup: null,
+                           text: "Please, choose the currency:\r\n" + String.Join(" ", currencyList.Currencies) + "\r\n\r\n*Usage*: /currency _Currency_",
+                           parseMode: ParseMode.MarkdownV2,
                            cancellationToken: cancellationToken);
+                    }
+                    else
+                    {
+                        sentMessage = await botClient.SendTextMessageAsync(
+                        chatId: chatId,
+                        text: "Wrong date\\!",
+                        parseMode: ParseMode.MarkdownV2,
+                        cancellationToken: cancellationToken);
+                    }
+                    break;
+                case "/currency":
+                    if (command.Length < 2)
+                    {
+                        sentMessage = await botClient.SendTextMessageAsync(
+                            chatId: chatId,
+                            text: "Please, choose the currency:\r\n" + String.Join(" ", currencyList.Currencies) + "\r\n\r\n*Usage*: /currency _Currency_",
+                            parseMode: ParseMode.MarkdownV2,
+                            cancellationToken: cancellationToken);
+                        break;
+                    }
+
+                    if (currencyList != null)
+                    {
+                        currentCurrency = currencyList.Currencies.Find(c => !string.IsNullOrWhiteSpace(c) && c.ToUpper() == command[1].ToUpper());
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(currentCurrency))
+                    {
+                        sentMessage = await botClient.SendTextMessageAsync(
+                            chatId: chatId,
+                            text: currentCurrency,
+                            //parseMode: ParseMode.MarkdownV2,
+                            cancellationToken: cancellationToken);
+                        Currency c = (Currency)Enum.Parse(typeof(Currency), currentCurrency.ToUpper());
+                        PrivatBankCurrencyRateServiceModel privatBankCurrencyRate =
+                            new PrivatBankCurrencyRateServiceModel(currencyRatesSource, c);
+                        PrivatBankReportModel rep = new PrivatBankReportModel(privatBankCurrencyRate);
+                        sentMessage = await botClient.SendTextMessageAsync(
+                            chatId: chatId,
+                            text: rep.Report,
+                            replyMarkup: null,
+                            cancellationToken: cancellationToken);
+                    }
+                    else
+                    {
+                        sentMessage = await botClient.SendTextMessageAsync(
+                            chatId: chatId,
+                            text: command[1] + " - wrong currency!",
+                            cancellationToken: cancellationToken);
+
+                    }
                     break;
 
                 case "/banks":
@@ -139,7 +243,7 @@ namespace TelegramBot
                         DateTime d;
                         if (DateTime.TryParse(command[1], out d))
                         {
-                            GetJsonDataFromBank privatBankRates = new(BankSettings.PrivatBank, "https://api.privatbank.ua/p24api/exchange_rates?json&date=");
+                            GetJsonDataFromBank privatBankRates = new(currentBank);
                             string privatBankJsonData = privatBankRates.Get(d).Result;
                             JsonDocument doc = JsonDocument.Parse(privatBankJsonData);
                             JsonElement root = doc.RootElement;
