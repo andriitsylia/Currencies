@@ -8,7 +8,7 @@ namespace TelegramBot.Models
 {
     public class PrivatBankCurrencyRateServiceModel
     {
-        private readonly PrivatBankCurrencyRatesSourceModel _currencyRates;
+        private readonly PrivatBankRatesSourceModel _currencyRates;
         private readonly string _baseCurrency;
         private readonly string _currency;
         private readonly string _purchaseRate;
@@ -40,7 +40,7 @@ namespace TelegramBot.Models
             get => _date;
         }
 
-        public PrivatBankCurrencyRateServiceModel(PrivatBankCurrencyRatesSourceModel currencyRates, Currency currency)
+        public PrivatBankCurrencyRateServiceModel(PrivatBankRatesSourceModel currencyRates, Currency currency)
         {
             _currencyRates = currencyRates ?? throw new ArgumentNullException(nameof(currencyRates), "Received a null argument");
             _date = currencyRates.date;

@@ -17,7 +17,7 @@ namespace TelegramBot.Models
             get => _currencies;
         }
 
-        public PrivatBankCurrencyListServiceModel(PrivatBankCurrencyRatesSourceModel currencyRates)
+        public PrivatBankCurrencyListServiceModel(PrivatBankRatesSourceModel currencyRates)
         {
             _bank = currencyRates.bank;
             _date = currencyRates.date;

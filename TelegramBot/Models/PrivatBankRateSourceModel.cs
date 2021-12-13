@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TelegramBot.Models
 {
-    public class PrivatBankCurrencyRateSourceModel
+    public class PrivatBankRateSourceModel
     {
         public string baseCurrency { get; set; }
         public string currency { get; set; }

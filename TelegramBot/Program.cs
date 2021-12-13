@@ -112,7 +112,7 @@ namespace TelegramBot
                             string privatBankJsonData = privatBankRates.Get(d).Result;
                             JsonDocument doc = JsonDocument.Parse(privatBankJsonData);
                             JsonElement root = doc.RootElement;
-                            PrivatBankCurrencyRatesSourceModel currencyRatesSource = JsonSerializer.Deserialize<PrivatBankCurrencyRatesSourceModel>(root.ToString());
+                            PrivatBankRatesSourceModel currencyRatesSource = JsonSerializer.Deserialize<PrivatBankRatesSourceModel>(root.ToString());
                             PrivatBankCurrencyListServiceModel privatBankCurrencyList = new(currencyRatesSource);
 
                             int pos = privatBankCurrencyList.Currencies.IndexOf(command[2].ToUpper());
@@ -128,7 +128,7 @@ namespace TelegramBot
                                 Currency c = (Currency)Enum.Parse(typeof(Currency), command[2].ToUpper());
                                 PrivatBankCurrencyRateServiceModel privatBankCurrencyRate =
                                     new PrivatBankCurrencyRateServiceModel(currencyRatesSource, c);
-                                PrivatBankCurrencyRateReportModel rep = new PrivatBankCurrencyRateReportModel(privatBankCurrencyRate);
+                                PrivatBankReportModel rep = new PrivatBankReportModel(privatBankCurrencyRate);
                                 sentMessage = await botClient.SendTextMessageAsync(
                                     chatId: chatId,
                                     text: rep.Report,
