@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
@@ -13,29 +14,43 @@ using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBot.Models;
 using TelegramBot.Services;
+using TelegramBot.Settings;
 
 namespace TelegramBot
 {
-    public static class Program
+    public class Program
     {
         private static TelegramBotClient botClient;
+        
+        static IConfiguration mainSettings;
+        static string token;
+        static List<Bank> banks;
 
         public static async Task Main()
         {
-            botClient = new TelegramBotClient("2142968090:AAGoUGYNrs7xMGt-n5apOkGD6Xw2128NRGE");
+            mainSettings = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
 
+            token = mainSettings.GetSection("TelegramToken").Value;
+            banks = mainSettings.GetSection("Bank").Get<List<Bank>>();
+
+            botClient = new TelegramBotClient(token);
+            using CancellationTokenSource cts = new CancellationTokenSource();
+
+            await Worker(botClient, cts);
+
+            Console.ReadLine();
+            cts.Cancel();
+        }
+
+        public static async Task Worker(ITelegramBotClient botClient, CancellationTokenSource cts)
+        {
             User me = await botClient.GetMeAsync();
             Console.Title = me.Username ?? "My awesome telegram bot";
-
-            using CancellationTokenSource cts = new CancellationTokenSource();
 
             ReceiverOptions receiverOption = new ReceiverOptions { AllowedUpdates = { } };
 
             botClient.StartReceiving(HandleUpdateAsync, HandleErrorAsync, receiverOption, cts.Token);
-
             Console.WriteLine($"Start listening for @{me.Username}");
-            Console.ReadLine();
-            cts.Cancel();
         }
 
         public static async Task CallbackQueryHandler(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
@@ -78,22 +93,38 @@ namespace TelegramBot
                 case "/start":
                     sentMessage = await botClient.SendTextMessageAsync(
                         chatId: chatId,
-                        text: "Choose the bank, currency and enter the date",
+                        text: "Choose the bank",
                         replyMarkup: ReplyKeyboard.ReplyMainKeyboard(),
                         cancellationToken: cancellationToken);
                     break;
 
                 case "/bank":
+                    StringBuilder message = new();
+                    message.Append("*Please, make a choice*:\r\n");
+                    foreach (var bank in banks)
+                    {
+                        message.Append(bank.Name + "\r\n");
+                    }
+                    message.Append("\r\n*Usage*: /bank \\<_Bank_\\>");
                     sentMessage = await botClient.SendTextMessageAsync(
                         chatId: chatId,
-                        text: "Choose the bank",
+                        text: message.ToString(),
+                        parseMode: ParseMode.MarkdownV2,
                         //replyMarkup: replyKeyboardMarkup,
                         cancellationToken: cancellationToken);
                     break;
 
                 case "Currency":
-                case "/banks":
                 case "Banks":
+                    sentMessage = await botClient.SendTextMessageAsync(
+                           chatId: chatId,
+                           text: "Parameters is not enough:\r\n/banks date currency",
+                           replyToMessageId: update.Message.MessageId,
+                           replyMarkup: null,
+                           cancellationToken: cancellationToken);
+                    break;
+
+                case "/banks":
                     if (command.Length < 3)
                     {
                         sentMessage = await botClient.SendTextMessageAsync(
@@ -108,7 +139,7 @@ namespace TelegramBot
                         DateTime d;
                         if (DateTime.TryParse(command[1], out d))
                         {
-                            GetJsonDataFromBank privatBankRates = new(Bank.PrivatBank, "https://api.privatbank.ua/p24api/exchange_rates?json&date=");
+                            GetJsonDataFromBank privatBankRates = new(BankSettings.PrivatBank, "https://api.privatbank.ua/p24api/exchange_rates?json&date=");
                             string privatBankJsonData = privatBankRates.Get(d).Result;
                             JsonDocument doc = JsonDocument.Parse(privatBankJsonData);
                             JsonElement root = doc.RootElement;

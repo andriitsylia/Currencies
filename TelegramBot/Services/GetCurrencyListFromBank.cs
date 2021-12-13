@@ -10,7 +10,7 @@ namespace TelegramBot.Services
 {
     public class GetCurrencyListFromBank
     {
-        private Bank _bank;
+        private BankSettings _bank;
         private List<string> _currency;
 
         public List<string> Currency
@@ -19,7 +19,7 @@ namespace TelegramBot.Services
             set => _currency = value;
         }
 
-        public GetCurrencyListFromBank(Bank bank)
+        public GetCurrencyListFromBank(BankSettings bank)
         {
             _bank = bank;
             _currency = Get();

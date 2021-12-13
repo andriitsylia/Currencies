@@ -13,11 +13,11 @@ namespace TelegramBot.Services
         private const string PRIVAT_BANK_CONNECTION_ADRESS = "https://api.privatbank.ua/p24api/exchange_rates?json&date=";
         private const string DATE_FORMAT = "dd.MM.yyyy";
 
-        private Bank _bank;
+        private BankSettings _bank;
         private string _connectionAddress;
         private HttpClient _client;
 
-        public GetJsonDataFromBank(Bank bank, string connectionAddress)
+        public GetJsonDataFromBank(BankSettings bank, string connectionAddress)
         {
             _bank = bank;
             _connectionAddress = connectionAddress ?? throw new ArgumentNullException(nameof(connectionAddress), "Received a null argument");

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TelegramBot.Models
 {
-    public enum Bank
+    public enum BankSettings
     {
         NBU,
         PrivatBank,
