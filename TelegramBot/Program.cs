@@ -20,16 +20,11 @@ namespace TelegramBot
 {
     public class Program
     {
-        static IConfiguration mainSettings;
-        static string token;
-        static List<Bank> banks;
-
         public static async Task Main()
         {
-            mainSettings = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+            IConfiguration  mainSettings = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
 
-            token = mainSettings.GetSection("TelegramToken").Value;
-            banks = mainSettings.GetSection("Bank").Get<List<Bank>>();
+            string token = mainSettings.GetSection("TelegramToken").Value;
 
             Bot bot = new(token);
             await Bot.Run();

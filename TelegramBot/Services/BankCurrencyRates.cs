@@ -9,27 +9,20 @@ using TelegramBot.Settings;
 
 namespace TelegramBot.Services
 {
-    public class GetJsonDataFromBank
+    public class BankCurrencyRates
     {
-        private const string PRIVAT_BANK_CONNECTION_ADRESS = "https://api.privatbank.ua/p24api/exchange_rates?json&date=";
-        private const string DATE_FORMAT = "dd.MM.yyyy";
-
-        //private BankSettings _bank;
-        //private string _connectionAddress;
         private HttpClient _client;
         private Bank _bank;
 
-        public GetJsonDataFromBank(Bank bank)// BankSettings bank, string connectionAddress)
+        public BankCurrencyRates(Bank bank)
         {
-            //            _bank = bank;
-            //            _connectionAddress = connectionAddress ?? throw new ArgumentNullException(nameof(connectionAddress), "Received a null argument");
             _bank = bank ?? throw new ArgumentNullException(nameof(bank), "Received a null argument");
             _client = new HttpClient();
         }
 
-        public async Task<string> Get(DateTime date)
+        public async Task<string> GetPerDateAsJson(DateTime date)
         {
-            _client.BaseAddress = new Uri(_bank.ConnectionAddress + date.Date.ToString(DATE_FORMAT));
+            _client.BaseAddress = new Uri(_bank.ConnectionAddress + date.Date.ToString(_bank.DateFormat));
             _client.DefaultRequestHeaders.Accept.Clear();
             _client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 

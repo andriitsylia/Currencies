@@ -6,12 +6,6 @@ using System.Threading.Tasks;
 
 namespace TelegramBot.Models
 {
-    public enum BankSettings
-    {
-        NBU,
-        PrivatBank,
-        Monobank
-    }
 
     public enum Currency : int
     {

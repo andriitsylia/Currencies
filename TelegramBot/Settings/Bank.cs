@@ -11,6 +11,6 @@ namespace TelegramBot.Settings
         public string Name { get; set; }
         public string ConnectionAddress { get; set; }
         public string DateFormat { get; set; }
-        public string DecimalDigits { get; set; }
+        public int DecimalDigits { get; set; }
     }
 }

@@ -11,8 +11,8 @@ namespace TelegramBot.Models
         private readonly PrivatBankRatesSourceModel _currencyRates;
         private readonly string _baseCurrency;
         private readonly string _currency;
-        private readonly string _purchaseRate;
-        private readonly string _saleRate;
+        private readonly float _purchaseRate;
+        private readonly float _saleRate;
         private readonly string _date;
 
         public string BaseCurrency
@@ -25,12 +25,12 @@ namespace TelegramBot.Models
             get => _currency;
         }
 
-        public string PurchaseRate
+        public float PurchaseRate
         { 
             get => _purchaseRate;
         }
 
-        public string SaleRate
+        public float SaleRate
         {
             get => _saleRate;
         }
@@ -40,14 +40,14 @@ namespace TelegramBot.Models
             get => _date;
         }
 
-        public PrivatBankCurrencyRateServiceModel(PrivatBankRatesSourceModel currencyRates, Currency currency)
+        public PrivatBankCurrencyRateServiceModel(PrivatBankRatesSourceModel currencyRates, string currency)
         {
             _currencyRates = currencyRates ?? throw new ArgumentNullException(nameof(currencyRates), "Received a null argument");
             _date = currencyRates.date;
             _baseCurrency = currencyRates.baseCurrencyLit;
-            _currency = currency.ToString();
-            _purchaseRate = _currencyRates.exchangeRate.Where(c => c.currency == _currency).Single().purchaseRate.ToString();
-            _saleRate = _currencyRates.exchangeRate.Where(c => c.currency == _currency).Single().saleRate.ToString();
+            _currency = currency;
+            _purchaseRate = _currencyRates.exchangeRate.FirstOrDefault(c => c.currency == _currency).purchaseRate;
+            _saleRate = _currencyRates.exchangeRate.FirstOrDefault(c => c.currency == _currency).saleRate;
         }
     }
 }

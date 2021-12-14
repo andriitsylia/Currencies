@@ -21,8 +21,8 @@ namespace TelegramBot.Models
         {
             _bank = currencyRates.bank;
             _date = currencyRates.date;
-            var c = currencyRates.exchangeRate.Select(c => c.currency);
-            _currencies = new List<string>(c);
+            //var c = currencyRates.exchangeRate.Select(c => c.currency);
+            _currencies = currencyRates.exchangeRate.Select(c => c.currency).ToList<string>();//new List<string>(c);
         }
     }
 }

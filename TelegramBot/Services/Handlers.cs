@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -17,10 +16,11 @@ namespace TelegramBot.Services
 {
     public class Handlers
     {
+        private static Banks _banks;
         static Bank currentBank;
         static DateTime currentDate;
         static string currentCurrency;
-        static PrivatBankRatesSourceModel currencyRatesSource;
+        static PrivatBankRatesSourceModel ratesSource;
         static PrivatBankCurrencyListServiceModel currencyList;
 
         public static async Task CallbackQueryHandler(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
@@ -58,21 +58,23 @@ namespace TelegramBot.Services
             var chatId = update.Message.Chat.Id;
             var messageText = update.Message.Text;
             string[] command = messageText.Split(" ");
+
             switch (command[0])
             {
                 case "/start":
                     await Usage(botClient, update, cancellationToken);
 
-                    currentBank = new();
-                    currentDate = new();
-                    currentCurrency = String.Empty;
+                    currentBank = null;
+                    currentDate = DateTime.MaxValue;
+                    currentCurrency = string.Empty;
+                    _banks = new BanksListFromSettings().Get();
 
                     StringBuilder message = new();
                     message.Append("*Please, choose the bank*:\n");
-                    //foreach (var bank in banks)
-                    //{
-                    //    message.Append(bank.Name + "\r\n");
-                    //}
+                    foreach (var bank in _banks.Items)
+                    {
+                        message.Append(bank.Name + "\n");
+                    }
                     sentMessage = await botClient.SendTextMessageAsync(
                         chatId: chatId,
                         text: message.ToString(),
@@ -82,7 +84,19 @@ namespace TelegramBot.Services
                     break;
 
                 case "/bank":
-                    if ((command.Length < 2))
+                    if (_banks == null)
+                    {
+                        sentMessage = await botClient.SendTextMessageAsync(
+                            chatId: chatId,
+                            text: "Restart the bot",
+                            replyMarkup: null,
+                            cancellationToken: cancellationToken);
+
+                        await Usage(botClient, update, cancellationToken);
+                        break;
+                    }
+
+                    if (command.Length < 2)
                     {
                         sentMessage = await botClient.SendTextMessageAsync(
                             chatId: chatId,
@@ -95,13 +109,19 @@ namespace TelegramBot.Services
                         await Usage(botClient, update, cancellationToken);
                         break;
                     }
-                    //currentBank = banks.Find(b => b.Name.ToUpper() == command[1].ToUpper());
+
+                    currentBank = _banks.Items.FirstOrDefault(b => b.Name.ToUpper() == command[1].ToUpper());
+
                     if (currentBank != null)
                     {
+                        currentDate = DateTime.MaxValue;
+                        currentCurrency = String.Empty;
+
                         sentMessage = await botClient.SendTextMessageAsync(
                         chatId: chatId,
-                        text: "You choose the *" + currentBank.Name + "*\n\nEnter the date",
+                        text: "You choose the *" + currentBank.Name + "*\nEnter the date",
                         parseMode: ParseMode.MarkdownV2,
+                        replyMarkup: null,
                         cancellationToken: cancellationToken);
                     }
                     else
@@ -117,7 +137,19 @@ namespace TelegramBot.Services
                     break;
 
                 case "/date":
-                    if ((command.Length < 2))
+                    if (currentBank == null)
+                    {
+                        sentMessage = await botClient.SendTextMessageAsync(
+                            chatId: chatId,
+                            text: "Choose the bank",
+                            replyMarkup: null,
+                            cancellationToken: cancellationToken);
+
+                        await Usage(botClient, update, cancellationToken);
+                        break;
+                    }
+
+                    if (command.Length < 2)
                     {
                         sentMessage = await botClient.SendTextMessageAsync(
                             chatId: chatId,
@@ -133,24 +165,20 @@ namespace TelegramBot.Services
 
                     if (DateTime.TryParse(command[1], out currentDate))
                     {
+                        currentCurrency = String.Empty;
+
                         sentMessage = await botClient.SendTextMessageAsync(
                         chatId: chatId,
-                        text: currentDate.ToString("dd.MM.yyyy"),
+                        text: "Date is " + currentDate.ToString(currentBank.DateFormat),
+                        replyMarkup: null,
                         cancellationToken: cancellationToken);
 
-                        GetJsonDataFromBank bankRates = new(currentBank);
-                        string bankJsonData = bankRates.Get(currentDate).Result;
-                        JsonDocument doc = JsonDocument.Parse(bankJsonData);
-                        JsonElement root = doc.RootElement;
-                        //foreach (var bank in banks)
-                        //{
-                        //    if (bank.Name == currentBank.Name)
-                        //    {
-                        //        currencyRatesSource = JsonSerializer.Deserialize<PrivatBankRatesSourceModel>(root.ToString());
-                        //        currencyList = new(currencyRatesSource);
-                        //        break;
-                        //    }
-                        //}
+                        string jsonData = new BankCurrencyRates(currentBank).GetPerDateAsJson(currentDate).Result;
+                        JsonElement root = JsonDocument.Parse(jsonData).RootElement;
+
+                        ratesSource = JsonSerializer.Deserialize<PrivatBankRatesSourceModel>(root.ToString());
+                        currencyList = new PrivatBankCurrencyListServiceModel(ratesSource);
+
                         sentMessage = await botClient.SendTextMessageAsync(
                            chatId: chatId,
                            text: "Please, choose the any of the following currency :\n" + String.Join(" ", currencyList.Currencies),
@@ -171,6 +199,18 @@ namespace TelegramBot.Services
                     break;
 
                 case "/currency":
+                    if (currentDate == DateTime.MaxValue)
+                    {
+                        sentMessage = await botClient.SendTextMessageAsync(
+                            chatId: chatId,
+                            text: "Enter the date",
+                            replyMarkup: null,
+                            cancellationToken: cancellationToken);
+
+                        await Usage(botClient, update, cancellationToken);
+                        break;
+                    }
+
                     if (command.Length < 2)
                     {
                         sentMessage = await botClient.SendTextMessageAsync(
@@ -184,16 +224,13 @@ namespace TelegramBot.Services
                         break;
                     }
 
-                    //if (currencyList != null)
-                    //{
-                        currentCurrency = currencyList?.Currencies.Find(c => !string.IsNullOrWhiteSpace(c) && c.ToUpper() == command[1].ToUpper());
-                    //}
+                    currentCurrency = currencyList?.Currencies.Find(c => !string.IsNullOrWhiteSpace(c) && c.ToUpper() == command[1].ToUpper());
 
                     if (!string.IsNullOrWhiteSpace(currentCurrency))
                     {
-                        Currency c = (Currency)Enum.Parse(typeof(Currency), currentCurrency.ToUpper());
+                        //Currency c = (Currency)Enum.Parse(typeof(Currency), currentCurrency.ToUpper());
                         PrivatBankCurrencyRateServiceModel privatBankCurrencyRate =
-                            new PrivatBankCurrencyRateServiceModel(currencyRatesSource, c);
+                            new PrivatBankCurrencyRateServiceModel(ratesSource, currentCurrency);
                         PrivatBankReportModel rep = new PrivatBankReportModel(privatBankCurrencyRate);
 
                         sentMessage = await botClient.SendTextMessageAsync(
@@ -222,6 +259,8 @@ namespace TelegramBot.Services
                         cancellationToken: cancellationToken);
                     break;
 
+                case "/help":
+
                 default:
                     await Usage(botClient, update, cancellationToken);
                     break;
@@ -236,7 +275,8 @@ namespace TelegramBot.Services
                            + "/start \\- restart the bot\n"
                            + "/bank _bank_\n"
                            + "/date _dd\\.mm\\.yyyy_\n"
-                           + "/currency _currency_";
+                           + "/currency _currency_\n"
+                           + "/help";
 
             Message sentMessage = await botClient.SendTextMessageAsync(
                        chatId: chatId,
