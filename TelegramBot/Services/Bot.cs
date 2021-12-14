@@ -1,0 +1,39 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Telegram.Bot;
+using Telegram.Bot.Extensions.Polling;
+using Telegram.Bot.Types;
+
+namespace TelegramBot.Services
+{
+    public class Bot
+    {
+        private static string _token;
+
+        public Bot(string token)
+        {
+            _token = token;
+        }
+
+        public static async Task Run()
+        {
+            ITelegramBotClient botClient = new TelegramBotClient(_token);
+            using CancellationTokenSource cts = new();
+
+            User me = await botClient.GetMeAsync();
+            Console.Title = me.Username ?? "My awesome telegram bot";
+
+            ReceiverOptions receiverOption = new() { AllowedUpdates = { } };
+            botClient.StartReceiving(Handlers.HandleUpdateAsync, Handlers.HandleErrorAsync, receiverOption, cts.Token);
+
+            Console.WriteLine($"Start listening for @{me.Username}");
+            Console.ReadLine();
+
+            cts.Cancel();
+        }
+    }
+}
