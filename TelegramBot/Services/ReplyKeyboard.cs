@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBot.Models;
+using TelegramBot.Settings;
 
 namespace TelegramBot.Services
 {
@@ -21,12 +22,12 @@ namespace TelegramBot.Services
             { ResizeKeyboard = true };
         }
 
-        public static ReplyKeyboardMarkup ReplyCurrencyKeyboard(PrivatBankCurrencyListServiceModel privatBankCurrencyList)
+        public static ReplyKeyboardMarkup ReplyCurrencyKeyboard(CurrencyListServiceModel currencyList)
         {
             ReplyKeyboardMarkup replyKeyboardMarkup;
             List<KeyboardButton> row = new();
             List<List<KeyboardButton>> keyboard = new();
-            foreach (var currency in privatBankCurrencyList.Currencies)
+            foreach (var currency in currencyList.Currencies)
             {
                 if (!string.IsNullOrWhiteSpace(currency))
                 {
@@ -44,12 +45,29 @@ namespace TelegramBot.Services
             return replyKeyboardMarkup;
         }
 
-        public static InlineKeyboardMarkup InlineCurrencyKeyboard(PrivatBankCurrencyListServiceModel privatBankCurrencyList)
+        public static InlineKeyboardMarkup InlineBanksKeyboard(Banks banks)
+        {
+            InlineKeyboardMarkup inlineKeyboardMarkup;
+            List<List<InlineKeyboardButton>> keyboard = new();
+            foreach (var bank in banks.Items)
+            {
+                if (!string.IsNullOrWhiteSpace(bank.Name))
+                {
+                    keyboard.Add(new List<InlineKeyboardButton>()
+                        { InlineKeyboardButton.WithCallbackData(text: bank.Name, callbackData: "/bank " + bank.Name) });
+                }
+            }
+            inlineKeyboardMarkup = new(keyboard);
+
+            return inlineKeyboardMarkup;
+        }
+
+        public static InlineKeyboardMarkup InlineCurrencyKeyboard(CurrencyListServiceModel currencyList)
         {
             InlineKeyboardMarkup inlineKeyboardMarkup;
             List<InlineKeyboardButton> row = new();
             List<List<InlineKeyboardButton>> keyboard = new();
-            foreach (var currency in privatBankCurrencyList.Currencies)
+            foreach (var currency in currencyList.Currencies)
             {
                 if (!string.IsNullOrWhiteSpace(currency))
                 {
@@ -65,6 +83,22 @@ namespace TelegramBot.Services
             row = new List<InlineKeyboardButton>();
             row.Add(InlineKeyboardButton.WithCallbackData(text: "Hide currency keyboard", callbackData: "/hide_currency_keyboard"));
             keyboard.Add(row);
+            inlineKeyboardMarkup = new(keyboard);
+
+            return inlineKeyboardMarkup;
+        }
+
+        public static InlineKeyboardMarkup InlineDateKeyboard(DateTime date)
+        {
+            InlineKeyboardMarkup inlineKeyboardMarkup;
+            List<InlineKeyboardButton> row = new();
+            List<List<InlineKeyboardButton>> keyboard = new();
+
+          //  keyboard.Add(new List<InlineKeyboardButton>()
+          //              { InlineKeyboardButton.WithCallbackData(text: bank.Name, callbackData: "/bank " + bank.Name) });
+
+
+           
             inlineKeyboardMarkup = new(keyboard);
 
             return inlineKeyboardMarkup;

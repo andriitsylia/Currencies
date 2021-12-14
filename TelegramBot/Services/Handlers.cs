@@ -21,7 +21,7 @@ namespace TelegramBot.Services
         static DateTime currentDate;
         static string currentCurrency;
         static PrivatBankRatesSourceModel ratesSource;
-        static PrivatBankCurrencyListServiceModel currencyList;
+        static CurrencyListServiceModel currencyList;
 
         public static async Task CallbackQueryHandler(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
@@ -81,6 +81,14 @@ namespace TelegramBot.Services
                         parseMode: ParseMode.MarkdownV2,
                         replyMarkup: null,
                         cancellationToken: cancellationToken);
+
+                    //sentMessage = await botClient.SendTextMessageAsync(
+                    //    chatId: chatId,
+                    //    text: message.ToString(),
+                    //    parseMode: ParseMode.MarkdownV2,
+                    //    replyMarkup: ReplyKeyboard.InlineBanksKeyboard(_banks),
+                    //    cancellationToken: cancellationToken);
+
                     break;
 
                 case "/bank":
@@ -134,6 +142,7 @@ namespace TelegramBot.Services
                             replyMarkup: null,
                             cancellationToken: cancellationToken);
                     }
+
                     break;
 
                 case "/date":
@@ -177,12 +186,11 @@ namespace TelegramBot.Services
                         JsonElement root = JsonDocument.Parse(jsonData).RootElement;
 
                         ratesSource = JsonSerializer.Deserialize<PrivatBankRatesSourceModel>(root.ToString());
-                        currencyList = new PrivatBankCurrencyListServiceModel(ratesSource);
+                        currencyList = new CurrencyListServiceModel(ratesSource);
 
                         sentMessage = await botClient.SendTextMessageAsync(
                            chatId: chatId,
-                           text: "Please, choose the any of the following currency :\n" + String.Join(" ", currencyList.Currencies),
-                           parseMode: ParseMode.MarkdownV2,
+                           text: "Please, choose any of the following currency :\n" + String.Join(" ", currencyList.Currencies),
                            replyMarkup: null,
                            cancellationToken: cancellationToken);
                     }
@@ -196,6 +204,14 @@ namespace TelegramBot.Services
                             replyMarkup: null,
                             cancellationToken: cancellationToken);
                     }
+
+
+                    sentMessage = await botClient.SendTextMessageAsync(
+                        chatId: chatId,
+                        text: "Date is " + currentDate.ToString(currentBank.DateFormat),
+                        replyMarkup: ReplyKeyboard.InlineCurrencyKeyboard(currencyList),
+                        cancellationToken: cancellationToken);
+
                     break;
 
                 case "/currency":
@@ -228,10 +244,8 @@ namespace TelegramBot.Services
 
                     if (!string.IsNullOrWhiteSpace(currentCurrency))
                     {
-                        //Currency c = (Currency)Enum.Parse(typeof(Currency), currentCurrency.ToUpper());
-                        PrivatBankCurrencyRateServiceModel privatBankCurrencyRate =
-                            new PrivatBankCurrencyRateServiceModel(ratesSource, currentCurrency);
-                        PrivatBankReportModel rep = new PrivatBankReportModel(privatBankCurrencyRate);
+                        CurrencyRateServiceModel currencyRate = new(ratesSource, currentCurrency);
+                        ReportModel rep = new(currencyRate);
 
                         sentMessage = await botClient.SendTextMessageAsync(
                             chatId: chatId,
@@ -249,14 +263,6 @@ namespace TelegramBot.Services
                             replyMarkup: null,
                             cancellationToken: cancellationToken);
                     }
-                    break;
-
-                case "Hide main keyboard":
-                    sentMessage = await botClient.SendTextMessageAsync(
-                        chatId: chatId,
-                        text: "Hide main keyboard",
-                        replyMarkup: new ReplyKeyboardRemove(),
-                        cancellationToken: cancellationToken);
                     break;
 
                 case "/help":
@@ -282,6 +288,7 @@ namespace TelegramBot.Services
                        chatId: chatId,
                        text: message,
                        parseMode: ParseMode.MarkdownV2,
+                       replyMarkup: null,
                        cancellationToken: cancellationToken);
         }
 

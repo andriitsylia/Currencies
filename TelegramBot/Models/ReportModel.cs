@@ -6,17 +6,17 @@ using System.Threading.Tasks;
 
 namespace TelegramBot.Models
 {
-    public class PrivatBankReportModel
+    public class ReportModel
     {
         private readonly string _report;
-        private readonly PrivatBankCurrencyRateServiceModel _currencyRate;
+        private readonly CurrencyRateServiceModel _currencyRate;
 
         public string Report
         {
             get => _report;
         }
 
-        public PrivatBankReportModel(PrivatBankCurrencyRateServiceModel currencyRate)
+        public ReportModel(CurrencyRateServiceModel currencyRate)
         {
             _currencyRate = currencyRate ?? throw new ArgumentNullException(nameof(currencyRate), "Received a null argument");
             _report = Create();
