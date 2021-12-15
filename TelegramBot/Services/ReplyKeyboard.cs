@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -91,17 +92,46 @@ namespace TelegramBot.Services
         public static InlineKeyboardMarkup InlineDateKeyboard(DateTime date)
         {
             InlineKeyboardMarkup inlineKeyboardMarkup;
-            List<InlineKeyboardButton> row = new();
+            List<InlineKeyboardButton> row;
             List<List<InlineKeyboardButton>> keyboard = new();
 
-          //  keyboard.Add(new List<InlineKeyboardButton>()
-          //              { InlineKeyboardButton.WithCallbackData(text: bank.Name, callbackData: "/bank " + bank.Name) });
+            row = new List<InlineKeyboardButton>();
+            row.Add(InlineKeyboardButton.WithCallbackData(text: "-", callbackData: "/date year-"));
+            row.Add(InlineKeyboardButton.WithCallbackData(text: date.Year.ToString(), callbackData: "/date year"));
+            row.Add(InlineKeyboardButton.WithCallbackData(text: "+", callbackData: "/date year+"));
+            keyboard.Add(row);
 
+            row = new List<InlineKeyboardButton>();
+            row.Add(InlineKeyboardButton.WithCallbackData(text: "-", callbackData: "/date month-"));
+            row.Add(InlineKeyboardButton.WithCallbackData(text: DateTimeFormatInfo.CurrentInfo.MonthNames[date.Month-1], callbackData: "/date month"));
+            row.Add(InlineKeyboardButton.WithCallbackData(text: "+", callbackData: "/date month+"));
+            keyboard.Add(row);
+            row = new List<InlineKeyboardButton>();
+            int days = DateTime.DaysInMonth(date.Year, date.Month);
+            int day = (int)date.DayOfWeek;
+            for (int i = 1; i < (day == 0 ? 7: day); i++)
+            {
+                row.Add(InlineKeyboardButton.WithCallbackData(text: " ", callbackData: "/date 0"));
+            }
+            for (int i = 1; i <= days; i++)
+            {
+                if (row.Count == 7)
+                {
+                    keyboard.Add(row);
+                    row = new List<InlineKeyboardButton>();
+                }
+                row.Add(InlineKeyboardButton.WithCallbackData(text: i.ToString(), callbackData: "/date " + i.ToString()));
+            }
+            for (int i = row.Count + 1; i <=7; i++)
+            {
+                row.Add(InlineKeyboardButton.WithCallbackData(text: " ", callbackData: "/date 0"));
+            }
+            keyboard.Add(row);
 
-           
             inlineKeyboardMarkup = new(keyboard);
 
             return inlineKeyboardMarkup;
         }
     }
 }
+

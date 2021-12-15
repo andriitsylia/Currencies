@@ -31,6 +31,72 @@ namespace TelegramBot.Services
 
             switch (command[0])
             {
+                case "/bank":
+                    await botClient.AnswerCallbackQueryAsync(
+                        update.CallbackQuery.Id,
+                        text: command[1],
+                        cancellationToken: cancellationToken);
+                    
+                    foreach (var bank in _banks.Items)
+                    {
+                        bank.Name += " 1";
+                    }
+
+                    sentMessage = await botClient.EditMessageReplyMarkupAsync(
+                        chatId: update.CallbackQuery.Message.Chat.Id,
+                        messageId: update.CallbackQuery.Message.MessageId,
+                        replyMarkup: ReplyKeyboard.InlineBanksKeyboard(_banks),
+                        cancellationToken: cancellationToken);
+
+                    break;
+
+                case "/date":
+                    bool pressButton = true;
+                    switch (command[1])
+                    {
+                        case "year-":
+                            currentDate = currentDate.AddYears(-1);
+                            break;
+                        case "year":
+                            pressButton = false;
+                            break;
+                        case "year+":
+                            currentDate = currentDate.AddYears(1);
+                            break;
+                        case "month-":
+                            currentDate = currentDate.AddMonths(-1);
+                            break;
+                        case "month":
+                            pressButton = false;
+                            break;
+                        case "month+":
+                            currentDate = currentDate.AddMonths(1);
+                            break;
+                        case "0":
+                            pressButton = false;
+                            break;
+                        default:
+                            pressButton = false;
+                            break;
+                    }
+                    
+                    await botClient.AnswerCallbackQueryAsync(
+                        update.CallbackQuery.Id,
+                        text: currentDate.ToString(),
+                        cancellationToken: cancellationToken);
+
+                    if (pressButton)
+                    {
+
+                        sentMessage = await botClient.EditMessageReplyMarkupAsync(
+                            chatId: update.CallbackQuery.Message.Chat.Id,
+                            messageId: update.CallbackQuery.Message.MessageId,
+                            replyMarkup: ReplyKeyboard.InlineDateKeyboard(currentDate),
+                            cancellationToken: cancellationToken);
+                    }
+
+                    break;
+
                 case "/currency":
                     sentMessage = await botClient.SendTextMessageAsync(
                         chatId: update.CallbackQuery.Message.Chat.Id,
@@ -41,6 +107,8 @@ namespace TelegramBot.Services
                         text: command[1],
                         cancellationToken: cancellationToken);
                     break;
+
+                    
 
                 case "/hide_currency_keyboard":
                     sentMessage = await botClient.EditMessageReplyMarkupAsync(
@@ -82,12 +150,12 @@ namespace TelegramBot.Services
                         replyMarkup: null,
                         cancellationToken: cancellationToken);
 
-                    //sentMessage = await botClient.SendTextMessageAsync(
-                    //    chatId: chatId,
-                    //    text: message.ToString(),
-                    //    parseMode: ParseMode.MarkdownV2,
-                    //    replyMarkup: ReplyKeyboard.InlineBanksKeyboard(_banks),
-                    //    cancellationToken: cancellationToken);
+                    sentMessage = await botClient.SendTextMessageAsync(
+                        chatId: chatId,
+                        text: message.ToString(),
+                        parseMode: ParseMode.MarkdownV2,
+                        replyMarkup: ReplyKeyboard.InlineBanksKeyboard(_banks),
+                        cancellationToken: cancellationToken);
 
                     break;
 
@@ -193,6 +261,18 @@ namespace TelegramBot.Services
                            text: "Please, choose any of the following currency :\n" + String.Join(" ", currencyList.Currencies),
                            replyMarkup: null,
                            cancellationToken: cancellationToken);
+
+                        sentMessage = await botClient.SendTextMessageAsync(
+                            chatId: chatId,
+                            text: "Date is " + currentDate.ToString(currentBank.DateFormat),
+                            replyMarkup: ReplyKeyboard.InlineCurrencyKeyboard(currencyList),
+                            cancellationToken: cancellationToken);
+
+                        sentMessage = await botClient.SendTextMessageAsync(
+                            chatId: chatId,
+                            text: "Date",
+                            replyMarkup: ReplyKeyboard.InlineDateKeyboard(currentDate),
+                            cancellationToken: cancellationToken);
                     }
                     else
                     {
@@ -204,13 +284,6 @@ namespace TelegramBot.Services
                             replyMarkup: null,
                             cancellationToken: cancellationToken);
                     }
-
-
-                    sentMessage = await botClient.SendTextMessageAsync(
-                        chatId: chatId,
-                        text: "Date is " + currentDate.ToString(currentBank.DateFormat),
-                        replyMarkup: ReplyKeyboard.InlineCurrencyKeyboard(currencyList),
-                        cancellationToken: cancellationToken);
 
                     break;
 
