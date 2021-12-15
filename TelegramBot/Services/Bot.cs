@@ -29,7 +29,8 @@ namespace TelegramBot.Services
             User me = await botClient.GetMeAsync();
             Console.Title = me.Username ?? "My awesome telegram bot";
 
-            ReceiverOptions receiverOption = new() { AllowedUpdates = { } };
+            ReceiverOptions receiverOption = new() { AllowedUpdates = { },
+                                                     ThrowPendingUpdates = true};
             botClient.StartReceiving(Handlers.HandleUpdateAsync, Handlers.HandleErrorAsync, receiverOption, cts.Token);
 
             Console.WriteLine($"Start listening for @{me.Username}");
