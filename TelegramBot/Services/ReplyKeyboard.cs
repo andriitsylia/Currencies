@@ -35,29 +35,6 @@ namespace TelegramBot.Services
             { ResizeKeyboard = true };
         }
 
-        //public static ReplyKeyboardMarkup ReplyCurrencyKeyboard(CurrencyListServiceModel currencyList)
-        //{
-        //    ReplyKeyboardMarkup replyKeyboardMarkup;
-        //    List<KeyboardButton> row = new();
-        //    List<List<KeyboardButton>> keyboard = new();
-        //    foreach (var currency in currencyList.Currencies)
-        //    {
-        //        if (!string.IsNullOrWhiteSpace(currency))
-        //        {
-        //            if (row.Count == BUTTONS_IN_ROW)
-        //            {
-        //                keyboard.Add(row);
-        //                row = new List<KeyboardButton>();
-        //            }
-        //            row.Add(currency);
-        //        }
-        //    }
-        //    keyboard.Add(row);
-        //    replyKeyboardMarkup = new(keyboard) { ResizeKeyboard = true };
-
-        //    return replyKeyboardMarkup;
-        //}
-
         public static InlineKeyboardMarkup InlineBanksKeyboard(Banks banks)
         {
             InlineKeyboardMarkup inlineKeyboardMarkup;

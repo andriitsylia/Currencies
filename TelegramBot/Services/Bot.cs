@@ -27,10 +27,9 @@ namespace TelegramBot.Services
             using CancellationTokenSource cts = new();
 
             User me = await botClient.GetMeAsync();
-            Console.Title = me.Username ?? "My awesome telegram bot";
+            Console.Title = me.Username ?? "Telegram currency bot";
 
-            ReceiverOptions receiverOption = new() { AllowedUpdates = { },
-                                                     ThrowPendingUpdates = true};
+            ReceiverOptions receiverOption = new() { AllowedUpdates = { } };//, ThrowPendingUpdates = true};
             botClient.StartReceiving(Handlers.HandleUpdateAsync, Handlers.HandleErrorAsync, receiverOption, cts.Token);
 
             Console.WriteLine($"Start listening for @{me.Username}");

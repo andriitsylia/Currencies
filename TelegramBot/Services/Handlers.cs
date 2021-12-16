@@ -123,6 +123,18 @@ namespace TelegramBot.Services
                     ratesSource = JsonSerializer.Deserialize<PrivatBankRatesSourceModel>(root.ToString());
                     currencyList = new CurrencyListServiceModel(ratesSource);
 
+                    if (currencyList.Currencies.Count == 0)
+                    {
+                        sentMessage = await botClient.SendTextMessageAsync(
+                               chatId: chatId,
+                               text: "The " + currentBank.Name
+                                   + " hasn't information about currency rates at "
+                                   + currentDate.ToString(currentBank.DateFormat) + "\n"
+                                   + "Select another date",
+                               cancellationToken: cancellationToken);
+                        break;
+                    }
+
                     sentMessage = await botClient.SendTextMessageAsync(
                        chatId: chatId,
                        text: "Select " + currentDate.ToString(currentBank.DateFormat),
@@ -168,7 +180,7 @@ namespace TelegramBot.Services
                 case "/mode":
                     sentMessage = await botClient.SendTextMessageAsync(
                         chatId: chatId,
-                        text: "Please, choose a bot mode:",
+                        text: "Please, select a bot mode:",
                         replyMarkup: ReplyKeyboard.ReplyModeKeyboard(),
                         cancellationToken: cancellationToken);
                     break;
@@ -182,6 +194,12 @@ namespace TelegramBot.Services
 
                     await Usage(botClient, update, cancellationToken);
 
+                    sentMessage = await botClient.SendTextMessageAsync(
+                        chatId: chatId,
+                        text: "Type */start*",
+                        parseMode: ParseMode.MarkdownV2,
+                        cancellationToken: cancellationToken);
+
                     break;
 
                 case BOT_MODE_BUTTON:
@@ -193,7 +211,7 @@ namespace TelegramBot.Services
 
                     sentMessage = await botClient.SendTextMessageAsync(
                         chatId: chatId,
-                        text: "Please, choose the _Bank_, the_Date_ and the _Currency_",
+                        text: "Please, select the _Bank_, the_Date_ and the _Currency_",
                         parseMode: ParseMode.MarkdownV2,
                         replyMarkup: ReplyKeyboard.ReplyMainKeyboard(),
                         cancellationToken: cancellationToken);
@@ -218,7 +236,7 @@ namespace TelegramBot.Services
                     _banks = new BanksListFromSettings().Get();
 
                     StringBuilder message = new();
-                    message.Append("*Please, choose the bank*:\n");
+                    message.Append("*Please, select the bank*:\n");
 
                     foreach (var bank in _banks.Items)
                     {
@@ -294,7 +312,7 @@ namespace TelegramBot.Services
                     {
                         sentMessage = await botClient.SendTextMessageAsync(
                             chatId: chatId,
-                            text: "Choose the bank",
+                            text: "Select the bank",
                             replyMarkup: null,
                             cancellationToken: cancellationToken);
 
@@ -325,11 +343,24 @@ namespace TelegramBot.Services
                         
                         ratesSource = JsonSerializer.Deserialize<PrivatBankRatesSourceModel>(root.ToString());
                         currencyList = new CurrencyListServiceModel(ratesSource);
+
+                        if (currencyList.Currencies.Count == 0)
+                        {
+                            sentMessage = await botClient.SendTextMessageAsync(
+                               chatId: chatId,
+                               text: "The " + currentBank.Name
+                                   + " hasn't information about currency rates at "
+                                   + currentDate.ToString(currentBank.DateFormat) + "\n"
+                                   + "Select another date",
+                               cancellationToken: cancellationToken);
+                            break;
+                        }
+
                         IsDateSelected = true;
 
                         sentMessage = await botClient.SendTextMessageAsync(
                            chatId: chatId,
-                           text: "Please, choose any of the following currency :\n"
+                           text: "Please, select any of the following currency :\n"
                                 + String.Join(" ", currencyList.Currencies)
                                 + "\n\nType */currency* _currency_",
                            parseMode: ParseMode.MarkdownV2,
@@ -427,7 +458,8 @@ namespace TelegramBot.Services
                     currentCurrency = string.Empty;
                     sentMessage = await botClient.SendTextMessageAsync(
                         chatId: chatId,
-                        text: "Select the date",
+                        text: "Select the date, then press *Confirm date* button",
+                        parseMode: ParseMode.MarkdownV2,
                         replyMarkup: ReplyKeyboard.InlineDateKeyboard(currentDate),
                         cancellationToken: cancellationToken);
                     break;
