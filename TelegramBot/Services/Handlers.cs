@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -117,10 +118,7 @@ namespace TelegramBot.Services
                 case "/confirmdate":
                     currentCurrency = String.Empty;
 
-                    string jsonData = new BankCurrencyRates(currentBank).GetPerDateAsJson(currentDate).Result;
-                    JsonElement root = JsonDocument.Parse(jsonData).RootElement;
-
-                    ratesSource = JsonSerializer.Deserialize<PrivatBankRatesSourceModel>(root.ToString());
+                    ratesSource = JsonRatesParse.Parse(currentBank, currentDate);
                     currencyList = new CurrencyListServiceModel(ratesSource);
 
                     if (currencyList.Currencies.Count == 0)
@@ -230,6 +228,7 @@ namespace TelegramBot.Services
                         parseMode: ParseMode.MarkdownV2,
                         replyMarkup: null,
                         cancellationToken: cancellationToken);
+                    ;
                     break;
 
                 case "/bankslist":
@@ -257,11 +256,10 @@ namespace TelegramBot.Services
                     {
                         sentMessage = await botClient.SendTextMessageAsync(
                             chatId: chatId,
-                            text: "Restart the bot",
+                            text: "Restart the bot\nType /start",
                             replyMarkup: null,
                             cancellationToken: cancellationToken);
 
-                        await Usage(botClient, update, cancellationToken);
                         break;
                     }
 
@@ -269,13 +267,12 @@ namespace TelegramBot.Services
                     {
                         sentMessage = await botClient.SendTextMessageAsync(
                             chatId: chatId,
-                            text: "Parameter _bank_ is missing",
+                            text: "Parameter _bank_ is missing\nType */bank* _bank_",
                             parseMode: ParseMode.MarkdownV2,
                             replyToMessageId: update.Message.MessageId,
                             replyMarkup: null,
                             cancellationToken: cancellationToken);
 
-                        await Usage(botClient, update, cancellationToken);
                         break;
                     }
 
@@ -312,11 +309,11 @@ namespace TelegramBot.Services
                     {
                         sentMessage = await botClient.SendTextMessageAsync(
                             chatId: chatId,
-                            text: "Select the bank",
+                            text: "Select the bank\nType */bank* _bank_",
+                            parseMode: ParseMode.MarkdownV2,
                             replyMarkup: null,
                             cancellationToken: cancellationToken);
 
-                        await Usage(botClient, update, cancellationToken);
                         break;
                     }
 
@@ -324,13 +321,12 @@ namespace TelegramBot.Services
                     {
                         sentMessage = await botClient.SendTextMessageAsync(
                             chatId: chatId,
-                            text: "Parameter _date_ is missing",
+                            text: "Parameter _date_ is missing\nType */date* _date_",
                             parseMode: ParseMode.MarkdownV2,
                             replyToMessageId: update.Message.MessageId,
                             replyMarkup: null,
                             cancellationToken: cancellationToken);
 
-                        await Usage(botClient, update, cancellationToken);
                         break;
                     }
 
@@ -338,10 +334,7 @@ namespace TelegramBot.Services
                     {
                         currentCurrency = String.Empty;
 
-                        string jsonData = new BankCurrencyRates(currentBank).GetPerDateAsJson(currentDate).Result;
-                        JsonElement root = JsonDocument.Parse(jsonData).RootElement;
-                        
-                        ratesSource = JsonSerializer.Deserialize<PrivatBankRatesSourceModel>(root.ToString());
+                        ratesSource = JsonRatesParse.Parse(currentBank, currentDate);
                         currencyList = new CurrencyListServiceModel(ratesSource);
 
                         if (currencyList.Currencies.Count == 0)
@@ -384,11 +377,11 @@ namespace TelegramBot.Services
                     {
                         sentMessage = await botClient.SendTextMessageAsync(
                             chatId: chatId,
-                            text: "Enter the date",
+                            text: "Enter the date\nType */date* _date_",
+                            parseMode: ParseMode.MarkdownV2,
                             replyMarkup: null,
                             cancellationToken: cancellationToken);
 
-                        await Usage(botClient, update, cancellationToken);
                         break;
                     }
 
@@ -396,12 +389,12 @@ namespace TelegramBot.Services
                     {
                         sentMessage = await botClient.SendTextMessageAsync(
                             chatId: chatId,
-                            text: "Сurrency isn't specified",
+                            text: "Сurrency isn't specified\nType */currency* _currency_",
                             replyToMessageId: update.Message.MessageId,
+                            parseMode: ParseMode.MarkdownV2,
                             replyMarkup: null,
                             cancellationToken: cancellationToken);
 
-                        await Usage(botClient, update, cancellationToken);
                         break;
                     }
 
@@ -483,7 +476,6 @@ namespace TelegramBot.Services
                     break;
 
                 case "/help":
-
                 default:
                     await Usage(botClient, update, cancellationToken);
                     break;
