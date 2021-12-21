@@ -9,7 +9,7 @@ using Telegram.Bot;
 using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using TelegramBot.Settings;
+using TelegramBot.BotHandlers;
 
 namespace TelegramBot.Services
 {

@@ -15,7 +15,7 @@ namespace TelegramBot.Services
         private const int BUTTONS_IN_ROW = 5;
         private const int BUTTONS_IN_WEEK = 7;
 
-        public static ReplyKeyboardMarkup ReplyMainKeyboard()
+        public static ReplyKeyboardMarkup MainKeyboard()
         {
             return new(new[]
             {
@@ -26,7 +26,7 @@ namespace TelegramBot.Services
             };
         }
 
-        public static ReplyKeyboardMarkup ReplyModeKeyboard()
+        public static ReplyKeyboardMarkup ModeKeyboard()
         {
             return new(new[]
             {
