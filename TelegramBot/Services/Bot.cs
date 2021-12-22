@@ -9,7 +9,7 @@ using Telegram.Bot;
 using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using TelegramBot.BotHandlers;
+using TelegramBot.Handlers;
 
 namespace TelegramBot.Services
 {
@@ -31,7 +31,7 @@ namespace TelegramBot.Services
             Console.Title = me.Username ?? "Telegram currency bot";
 
             ReceiverOptions receiverOption = new() { AllowedUpdates = new[] { UpdateType.Message, UpdateType.CallbackQuery }, ThrowPendingUpdates = true };
-            botClient.StartReceiving(Handlers.HandleUpdateAsync, Handlers.HandleErrorAsync, receiverOption, cts.Token);
+            botClient.StartReceiving(MainHandler.HandleUpdateAsync, MainHandler.HandleErrorAsync, receiverOption, cts.Token);
 
             Console.WriteLine($"Start listening for @{me.Username}");
             Console.ReadLine();

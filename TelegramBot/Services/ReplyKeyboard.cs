@@ -19,7 +19,11 @@ namespace TelegramBot.Services
         {
             return new(new[]
             {
-                new KeyboardButton[] {"Bank", "Date", "Currency"}
+                new KeyboardButton[] {
+                    BotCommands.BUTTON_BANK,
+                    BotCommands.BUTTON_DATE,
+                    BotCommands.BUTTON_CURRENCY
+                }
             })
             {
                 ResizeKeyboard = true
@@ -30,9 +34,14 @@ namespace TelegramBot.Services
         {
             return new(new[]
             {
-                new KeyboardButton[] {"Text", "Button"}
+                new KeyboardButton[] {
+                    BotCommands.BUTTON_TEXT,
+                    BotCommands.BUTTON_BUTTON
+                }
             })
-            { ResizeKeyboard = true };
+            {
+                ResizeKeyboard = true
+            };
         }
 
         public static InlineKeyboardMarkup InlineBanksKeyboard(Banks banks)
@@ -44,7 +53,9 @@ namespace TelegramBot.Services
                 if (!string.IsNullOrWhiteSpace(bank.Name))
                 {
                     keyboard.Add(new List<InlineKeyboardButton>()
-                        { InlineKeyboardButton.WithCallbackData(text: bank.Name, callbackData: "/bank " + bank.Name) });
+                    {
+                        InlineKeyboardButton.WithCallbackData(text: bank.Name, callbackData: BotCommands.CMD_BANK + " " + bank.Name)
+                    });
                 }
             }
             inlineKeyboardMarkup = new(keyboard);
@@ -62,24 +73,38 @@ namespace TelegramBot.Services
             {
                 new List<InlineKeyboardButton>()
                 {
-                    InlineKeyboardButton.WithCallbackData(text: "-", callbackData: "/date year-"),
-                    InlineKeyboardButton.WithCallbackData(text: date.Year.ToString(), callbackData: "/date year"),
-                    InlineKeyboardButton.WithCallbackData(text: "+", callbackData: "/date year+")
+                    InlineKeyboardButton.WithCallbackData(
+                        text: BotCommands.BUTTON_DECREMENT,
+                        callbackData: BotCommands.CMD_DATE + " " + BotCommands.PARAM_YEAR_DECREMENT),
+                    InlineKeyboardButton.WithCallbackData(
+                        text: date.Year.ToString(),
+                        callbackData: BotCommands.CMD_DATE + " " + BotCommands.PARAM_YEAR),
+                    InlineKeyboardButton.WithCallbackData(
+                        text: BotCommands.BUTTON_INCREMENT,
+                        callbackData: BotCommands.CMD_DATE + " " + BotCommands.PARAM_YEAR_INCREMENT)
                 },
                 new List<InlineKeyboardButton>()
                 {
-                    InlineKeyboardButton.WithCallbackData(text: "-", callbackData: "/date month-"),
-                    InlineKeyboardButton.WithCallbackData(text: DateTimeFormatInfo.CurrentInfo.MonthNames[date.Month - 1], callbackData: "/date month"),
-                    InlineKeyboardButton.WithCallbackData(text: "+", callbackData: "/date month+")
+                    InlineKeyboardButton.WithCallbackData(
+                        text: BotCommands.BUTTON_DECREMENT,
+                        callbackData: BotCommands.CMD_DATE + " " + BotCommands.PARAM_MONTH_DECREMENT),
+                    InlineKeyboardButton.WithCallbackData(
+                        text: DateTimeFormatInfo.CurrentInfo.MonthNames[date.Month - 1],
+                        callbackData: BotCommands.CMD_DATE + " " + BotCommands.PARAM_MONTH),
+                    InlineKeyboardButton.WithCallbackData(
+                        text: BotCommands.BUTTON_INCREMENT,
+                        callbackData: BotCommands.CMD_DATE + " " + BotCommands.PARAM_MONTH_INCREMENT)
                 }
             };
 
             row = new List<InlineKeyboardButton>();
             int days = DateTime.DaysInMonth(date.Year, date.Month);
             int day = (int)new DateTime(date.Year, date.Month, 1).DayOfWeek;
-            for (int i = 1; i < (day == 0 ? 7: day); i++)
+            for (int i = 1; i < (day == 0 ? 7 : day); i++)
             {
-                row.Add(InlineKeyboardButton.WithCallbackData(text: " ", callbackData: "/date 0"));
+                row.Add(InlineKeyboardButton.WithCallbackData(
+                    text: BotCommands.BUTTON_EMPTY,
+                    callbackData: BotCommands.CMD_DATE + " " + BotCommands.PARAM_EMPTY));
             }
             for (int i = 1; i <= days; i++)
             {
@@ -88,17 +113,23 @@ namespace TelegramBot.Services
                     keyboard.Add(row);
                     row = new List<InlineKeyboardButton>();
                 }
-                row.Add(InlineKeyboardButton.WithCallbackData(text: i.ToString(), callbackData: "/date " + i.ToString()));
+                row.Add(InlineKeyboardButton.WithCallbackData(
+                    text: i.ToString(),
+                    callbackData: BotCommands.CMD_DATE + " " + i.ToString()));
             }
             for (int i = row.Count + 1; i <= BUTTONS_IN_WEEK; i++)
             {
-                row.Add(InlineKeyboardButton.WithCallbackData(text: " ", callbackData: "/date 0"));
+                row.Add(InlineKeyboardButton.WithCallbackData(
+                    text: BotCommands.BUTTON_EMPTY,
+                    callbackData: BotCommands.CMD_DATE + " " + BotCommands.PARAM_EMPTY));
             }
             keyboard.Add(row);
 
             row = new List<InlineKeyboardButton>()
             {
-                InlineKeyboardButton.WithCallbackData(text: "Confirm date", callbackData: "/confirmdate")
+                InlineKeyboardButton.WithCallbackData(
+                    text: BotCommands.BUTTON_DATECONFIRM,
+                    callbackData: BotCommands.CMD_DATECONFIRM)
             };
             keyboard.Add(row);
 
@@ -121,7 +152,9 @@ namespace TelegramBot.Services
                         keyboard.Add(row);
                         row = new List<InlineKeyboardButton>();
                     }
-                    row.Add(InlineKeyboardButton.WithCallbackData(text: currency, callbackData: "/currency " + currency));
+                    row.Add(InlineKeyboardButton.WithCallbackData(
+                        text: currency,
+                        callbackData: BotCommands.CMD_CURRENCY + " " + currency));
                 }
             }
             keyboard.Add(row);

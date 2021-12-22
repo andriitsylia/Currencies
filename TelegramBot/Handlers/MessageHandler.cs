@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
-using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -14,13 +12,10 @@ using TelegramBot.Models;
 using TelegramBot.Services;
 using TelegramBot.Settings;
 
-namespace TelegramBot.BotHandlers
+namespace TelegramBot.Handlers
 {
-    public class Handlers
+    public class MessageHandler
     {
-        private const string BOT_MODE_TEXT = "Text";
-        private const string BOT_MODE_BUTTON = "Button";
-
         private static Banks _banks;
         private static Bank currentBank;
         private static DateTime currentDate;
@@ -29,7 +24,7 @@ namespace TelegramBot.BotHandlers
         private static PrivatBankRatesSourceModel ratesSource;
         private static CurrencyListServiceModel currencyList;
 
-        public static async Task MessageHandler(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+        public static async Task Handler(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             Message sentMessage;
             var chatId = update.Message.Chat.Id;
@@ -38,22 +33,18 @@ namespace TelegramBot.BotHandlers
 
             switch (command[0])
             {
-                case "/mode":
-                    sentMessage = await botClient.SendTextMessageAsync(
-                        chatId: chatId,
-                        text: "Please, select a bot mode:",
-                        replyMarkup: ReplyKeyboard.ModeKeyboard(),
-                        cancellationToken: cancellationToken);
+                case BotCommands.CMD_MODE:
+                    await CommandModeHandler.Handler(botClient, update, cancellationToken);
                     break;
 
-                case BOT_MODE_TEXT:
+                case BotCommands.BUTTON_TEXT:
                     sentMessage = await botClient.SendTextMessageAsync(
                         chatId: chatId,
-                        text: "Bot mode: " + BOT_MODE_TEXT,
+                        text: "Bot mode: " + BotCommands.BUTTON_TEXT,
                         replyMarkup: new ReplyKeyboardRemove(),
                         cancellationToken: cancellationToken);
 
-                    await Usage(botClient, update, cancellationToken);
+                    await CommandHelpHandler.Handler(botClient, update, cancellationToken);
 
                     sentMessage = await botClient.SendTextMessageAsync(
                         chatId: chatId,
@@ -63,10 +54,10 @@ namespace TelegramBot.BotHandlers
 
                     break;
 
-                case BOT_MODE_BUTTON:
+                case BotCommands.BUTTON_BUTTON:
                     sentMessage = await botClient.SendTextMessageAsync(
                         chatId: chatId,
-                        text: "Bot mode: " + BOT_MODE_BUTTON,
+                        text: "Bot mode: " + BotCommands.BUTTON_BUTTON,
                         replyMarkup: new ReplyKeyboardRemove(),
                         cancellationToken: cancellationToken);
 
@@ -80,7 +71,7 @@ namespace TelegramBot.BotHandlers
                     _banks = null;
                     break;
 
-                case "/start":
+                case BotCommands.CMD_START:
                     currentBank = null;
                     currentDate = DateTime.Today;
                     IsDateSelected = false;
@@ -91,10 +82,9 @@ namespace TelegramBot.BotHandlers
                         parseMode: ParseMode.MarkdownV2,
                         replyMarkup: null,
                         cancellationToken: cancellationToken);
-                    ;
                     break;
 
-                case "/bankslist":
+                case BotCommands.CMD_BANKSLIST:
                     _banks = new BanksListFromSettings().Get();
 
                     StringBuilder message = new();
@@ -114,7 +104,7 @@ namespace TelegramBot.BotHandlers
                         cancellationToken: cancellationToken);
                     break;
 
-                case "/bank":
+                case BotCommands.CMD_BANK:
                     if (_banks == null)
                     {
                         sentMessage = await botClient.SendTextMessageAsync(
@@ -167,7 +157,7 @@ namespace TelegramBot.BotHandlers
 
                     break;
 
-                case "/date":
+                case BotCommands.CMD_DATE:
                     if (currentBank == null)
                     {
                         sentMessage = await botClient.SendTextMessageAsync(
@@ -235,7 +225,7 @@ namespace TelegramBot.BotHandlers
                     }
                     break;
 
-                case "/currency":
+                case BotCommands.CMD_CURRENCY:
                     if (!IsDateSelected)
                     {
                         sentMessage = await botClient.SendTextMessageAsync(
@@ -286,22 +276,22 @@ namespace TelegramBot.BotHandlers
                     }
                     break;
 
-                case "Bank":
+                case BotCommands.BUTTON_BANK:
                     IsDateSelected = false;
                     currentCurrency = string.Empty;
 
-                    ButtonModeHandler._banks = new BanksListFromSettings().Get();
+                    CallbackQueryHandler._banks = new BanksListFromSettings().Get();
 
                     sentMessage = await botClient.SendTextMessageAsync(
                         chatId: chatId,
                         text: "Select the bank",
-                        replyMarkup: ReplyKeyboard.InlineBanksKeyboard(ButtonModeHandler._banks),
+                        replyMarkup: ReplyKeyboard.InlineBanksKeyboard(CallbackQueryHandler._banks),
                         cancellationToken: cancellationToken);
 
                     break;
 
-                case "Date":
-                    if (ButtonModeHandler.currentBank == null)
+                case BotCommands.BUTTON_DATE:
+                    if (CallbackQueryHandler.currentBank == null)
                     {
                         sentMessage = await botClient.SendTextMessageAsync(
                             chatId: chatId,
@@ -310,18 +300,18 @@ namespace TelegramBot.BotHandlers
                         break;
                     }
 
-                    ButtonModeHandler.currentDate = DateTime.Today;
-                    ButtonModeHandler.currentCurrency = string.Empty;
+                    CallbackQueryHandler.currentDate = DateTime.Today;
+                    CallbackQueryHandler.currentCurrency = string.Empty;
                     sentMessage = await botClient.SendTextMessageAsync(
                         chatId: chatId,
                         text: "Select the date, then press *Confirm date* button",
                         parseMode: ParseMode.MarkdownV2,
-                        replyMarkup: ReplyKeyboard.InlineDateKeyboard(ButtonModeHandler.currentDate),
+                        replyMarkup: ReplyKeyboard.InlineDateKeyboard(CallbackQueryHandler.currentDate),
                         cancellationToken: cancellationToken);
                     break;
 
-                case "Currency":
-                    if (!ButtonModeHandler.IsDateSelected)
+                case BotCommands.BUTTON_CURRENCY:
+                    if (!CallbackQueryHandler.IsDateSelected)
                     {
                         sentMessage = await botClient.SendTextMessageAsync(
                             chatId: chatId,
@@ -330,70 +320,20 @@ namespace TelegramBot.BotHandlers
                         break;
                     }
 
-                    ButtonModeHandler.currentCurrency = string.Empty;
+                    CallbackQueryHandler.currentCurrency = string.Empty;
                     sentMessage = await botClient.SendTextMessageAsync(
                         chatId: chatId,
                         text: "Select the currency",
-                        replyMarkup: ReplyKeyboard.InlineCurrencyKeyboard(ButtonModeHandler.currencyList),
+                        replyMarkup: ReplyKeyboard.InlineCurrencyKeyboard(CallbackQueryHandler.currencyList),
                         cancellationToken: cancellationToken);
                     break;
 
-                case "/help":
+                case BotCommands.CMD_HELP:
                 default:
-                    await Usage(botClient, update, cancellationToken);
+                    await CommandHelpHandler.Handler(botClient, update, cancellationToken);
                     break;
             }
             Console.WriteLine($"Received a '{messageText}' message in chat {chatId}");
         }
-
-        public static async Task Usage(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
-        {
-            var chatId = update.Message.Chat.Id;
-            string message = "*Bot usage:*\n"
-                           + "/start \\- begin\\/restart work with the bot\n"
-                           + "/bankslist\n"
-                           + "/bank _bank_\n"
-                           + "/date _dd\\.mm\\.yyyy_\n"
-                           + "/currency _currency_\n"
-                           + "/help";
-
-            Message sentMessage = await botClient.SendTextMessageAsync(
-                       chatId: chatId,
-                       text: message,
-                       parseMode: ParseMode.MarkdownV2,
-                       replyMarkup: null,
-                       cancellationToken: cancellationToken);
-        }
-
-        public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
-        {
-            switch (update.Type)
-            {
-                case UpdateType.CallbackQuery:
-                    await ButtonModeHandler.Handler(botClient, update, cancellationToken);
-                    break;
-
-                case UpdateType.Message:
-                    await MessageHandler(botClient, update, cancellationToken);
-                    break;
-
-                default:
-                    break;
-            }
-        }
-
-        public static Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
-        {
-            var ErrorMessage = exception switch
-            {
-                ApiRequestException apiRequestException => $"Telegram API Error:\n[{apiRequestException.ErrorCode}]\n{apiRequestException.Message}",
-                _ => exception.ToString()
-            };
-
-            Console.WriteLine(ErrorMessage);
-
-            return Task.CompletedTask;
-        }
-
     }
 }

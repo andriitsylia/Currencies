@@ -11,9 +11,9 @@ using TelegramBot.Models;
 using TelegramBot.Services;
 using TelegramBot.Settings;
 
-namespace TelegramBot.BotHandlers
+namespace TelegramBot.Handlers
 {
-    public class ButtonModeHandler
+    public class CallbackQueryHandler
     {
 
         public static Banks _banks;
@@ -35,7 +35,7 @@ namespace TelegramBot.BotHandlers
 
             switch (command[0])
             {
-                case "/bank":
+                case BotCommands.CMD_BANK:
 
                     await botClient.AnswerCallbackQueryAsync(
                         update.CallbackQuery.Id,
@@ -56,7 +56,7 @@ namespace TelegramBot.BotHandlers
                     cancellationToken: cancellationToken);
                     break;
 
-                case "/date":
+                case BotCommands.CMD_DATE:
                     bool isDayButtonPressed = true;
                     if (int.TryParse(command[1], out int buttonValue))
                     {
@@ -70,22 +70,22 @@ namespace TelegramBot.BotHandlers
                     {
                         switch (command[1])
                         {
-                            case "year-":
+                            case BotCommands.PARAM_YEAR_DECREMENT:
                                 currentDate = currentDate.AddYears(-1);
                                 break;
-                            case "year":
+                            case BotCommands.PARAM_YEAR:
                                 isDayButtonPressed = false;
                                 break;
-                            case "year+":
+                            case BotCommands.PARAM_YEAR_INCREMENT:
                                 currentDate = currentDate.AddYears(1);
                                 break;
-                            case "month-":
+                            case BotCommands.PARAM_MONTH_DECREMENT:
                                 currentDate = currentDate.AddMonths(-1);
                                 break;
-                            case "month":
+                            case BotCommands.PARAM_MONTH:
                                 isDayButtonPressed = false;
                                 break;
-                            case "month+":
+                            case BotCommands.PARAM_MONTH_INCREMENT:
                                 currentDate = currentDate.AddMonths(1);
                                 break;
                             default:
@@ -111,7 +111,7 @@ namespace TelegramBot.BotHandlers
 
                     break;
 
-                case "/confirmdate":
+                case BotCommands.CMD_DATECONFIRM:
                     currentCurrency = string.Empty;
 
                     ratesSource = JsonRatesParse.Parse(currentBank, currentDate);
@@ -143,7 +143,7 @@ namespace TelegramBot.BotHandlers
                        cancellationToken: cancellationToken);
                     break;
 
-                case "/currency":
+                case BotCommands.CMD_CURRENCY:
                     await botClient.AnswerCallbackQueryAsync(
                         callbackQueryId: update.CallbackQuery.Id,
                         text: command[1],
