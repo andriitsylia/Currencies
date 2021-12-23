@@ -26,7 +26,6 @@ namespace TelegramBot.Handlers
 
         public static async Task Handler(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-            Message sentMessage;
             var chatId = update.CallbackQuery.Message.Chat.Id;
 
             Console.WriteLine("InlineMessageId is " + update.CallbackQuery.Data);
@@ -37,23 +36,14 @@ namespace TelegramBot.Handlers
             {
                 case BotCommands.CMD_BANK:
 
-                    await botClient.AnswerCallbackQueryAsync(
-                        update.CallbackQuery.Id,
-                        text: command[1],
-                        cancellationToken: cancellationToken);
+                    await BotMessage.SendAnswerCallbackQuery(botClient, update.CallbackQuery.Id, command[1]);
 
                     currentBank = _banks.Items.FirstOrDefault(b => b.Name.ToUpper() == command[1].ToUpper());
 
                     currentDate = DateTime.Today;
                     currentCurrency = string.Empty;
 
-                    sentMessage = await botClient.SendTextMessageAsync(
-                    chatId: chatId,
-                    text: "*" + currentBank.Name + "*\n"
-                        + "Press *Date* button to select the date",
-                    parseMode: ParseMode.MarkdownV2,
-                    replyMarkup: null,
-                    cancellationToken: cancellationToken);
+                    await BotMessage.SendMessageMarkdown(botClient, chatId, $"* {currentBank.Name}*\nPress *Date* button to select the date");
                     break;
 
                 case BotCommands.CMD_DATE:
@@ -94,19 +84,15 @@ namespace TelegramBot.Handlers
                         }
                     }
 
-                    await botClient.AnswerCallbackQueryAsync(
-                        update.CallbackQuery.Id,
-                        text: currentDate.ToString("dd.MM.yyyy"),
-                        cancellationToken: cancellationToken);
+                    await BotMessage.SendAnswerCallbackQuery(botClient, update.CallbackQuery.Id, currentDate.ToString("dd.MM.yyyy"));
 
                     if (isDayButtonPressed)
                     {
-
-                        sentMessage = await botClient.EditMessageReplyMarkupAsync(
-                            chatId: update.CallbackQuery.Message.Chat.Id,
-                            messageId: update.CallbackQuery.Message.MessageId,
-                            replyMarkup: ReplyKeyboard.InlineDateKeyboard(currentDate),
-                            cancellationToken: cancellationToken);
+                        await BotMessage.EditMessage(
+                            botClient,
+                            update.CallbackQuery.Message.Chat.Id,
+                            update.CallbackQuery.Message.MessageId,
+                            ReplyKeyboard.InlineDateKeyboard(currentDate));
                     }
 
                     break;
@@ -119,45 +105,25 @@ namespace TelegramBot.Handlers
 
                     if (currencyList.Currencies.Count == 0)
                     {
-                        sentMessage = await botClient.SendTextMessageAsync(
-                               chatId: chatId,
-                               text: "The " + currentBank.Name
-                                   + " hasn't information about currency rates at "
-                                   + currentDate.ToString(currentBank.DateFormat) + "\n"
-                                   + "Select another date",
-                               cancellationToken: cancellationToken);
+                        await BotMessage.SendMessage(botClient, chatId, $"No currency rates on {currentDate.ToString(currentBank.DateFormat)}");
                         break;
                     }
-
-                    sentMessage = await botClient.SendTextMessageAsync(
-                       chatId: chatId,
-                       text: "Select " + currentDate.ToString(currentBank.DateFormat),
-                       cancellationToken: cancellationToken);
+                    await BotMessage.SendMessage(botClient, chatId, $"Select {currentDate.ToString(currentBank.DateFormat)}");
 
                     IsDateSelected = true;
 
-                    sentMessage = await botClient.SendTextMessageAsync(
-                       chatId: chatId,
-                       text: "Press *Currency* button to select the currency",
-                       parseMode: ParseMode.MarkdownV2,
-                       cancellationToken: cancellationToken);
+                    await BotMessage.SendMessageMarkdown(botClient, chatId, "Press *Currency* button to select the currency");
                     break;
 
                 case BotCommands.CMD_CURRENCY:
-                    await botClient.AnswerCallbackQueryAsync(
-                        callbackQueryId: update.CallbackQuery.Id,
-                        text: command[1],
-                        cancellationToken: cancellationToken);
+                    await BotMessage.SendAnswerCallbackQuery(botClient, update.CallbackQuery.Id, command[1]);
 
                     currentCurrency = currencyList?.Currencies.Find(c => !string.IsNullOrWhiteSpace(c) && c.ToUpper() == command[1].ToUpper());
 
                     CurrencyRateServiceModel currencyRate = new(ratesSource, currentCurrency);
                     ReportModel rep = new(currencyRate);
 
-                    sentMessage = await botClient.SendTextMessageAsync(
-                        chatId: chatId,
-                        text: rep.Report,
-                        cancellationToken: cancellationToken);
+                    await BotMessage.SendMessage(botClient, chatId, rep.Report);
                     break;
             }
         }
