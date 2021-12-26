@@ -10,5 +10,9 @@ namespace TelegramBot.Settings
     {
         public IEnumerable<Bank> Items { get; set; }
 
+        public override string ToString()
+        {
+            return String.Join("\n", Items.Select(i => i.Name));
+        }
     }
 }

@@ -22,7 +22,8 @@ namespace TelegramBot.Services
                 new KeyboardButton[] {
                     BotCommands.BUTTON_BANK,
                     BotCommands.BUTTON_DATE,
-                    BotCommands.BUTTON_CURRENCY
+                    BotCommands.BUTTON_CURRENCY,
+                    BotCommands.BUTTON_HELP
                 }
             })
             {
@@ -30,19 +31,19 @@ namespace TelegramBot.Services
             };
         }
 
-        public static ReplyKeyboardMarkup ModeKeyboard()
-        {
-            return new(new[]
-            {
-                new KeyboardButton[] {
-                    BotCommands.BUTTON_TEXT,
-                    BotCommands.BUTTON_BUTTON
-                }
-            })
-            {
-                ResizeKeyboard = true
-            };
-        }
+        //public static ReplyKeyboardMarkup ModeKeyboard()
+        //{
+        //    return new(new[]
+        //    {
+        //        new KeyboardButton[] {
+        //            BotCommands.BUTTON_TEXT,
+        //            BotCommands.BUTTON_BUTTON
+        //        }
+        //    })
+        //    {
+        //        ResizeKeyboard = true
+        //    };
+        //}
 
         public static InlineKeyboardMarkup InlineBanksKeyboard(Banks banks)
         {

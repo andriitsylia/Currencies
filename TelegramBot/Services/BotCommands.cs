@@ -33,6 +33,7 @@ namespace TelegramBot.Services
         public const string BUTTON_BANK = "Bank";
         public const string BUTTON_DATE = "Date";
         public const string BUTTON_CURRENCY = "Currency";
+        public const string BUTTON_HELP = "Help";
         public const string BUTTON_EMPTY = " ";
         public const string BUTTON_DECREMENT = "-";
         public const string BUTTON_INCREMENT = "+";

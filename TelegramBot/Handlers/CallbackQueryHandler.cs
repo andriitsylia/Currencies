@@ -43,7 +43,7 @@ namespace TelegramBot.Handlers
                     currentDate = DateTime.Today;
                     currentCurrency = string.Empty;
 
-                    await BotMessage.SendMessageMarkdown(botClient, chatId, $"* {currentBank.Name}*\nPress *Date* button to select the date");
+                    await BotMessage.SendMessageMarkdown(botClient, chatId, $"*{currentBank.Name}*\nPress *Date* button to select the date");
                     break;
 
                 case BotCommands.CMD_DATE:
@@ -63,17 +63,11 @@ namespace TelegramBot.Handlers
                             case BotCommands.PARAM_YEAR_DECREMENT:
                                 currentDate = currentDate.AddYears(-1);
                                 break;
-                            case BotCommands.PARAM_YEAR:
-                                isDayButtonPressed = false;
-                                break;
                             case BotCommands.PARAM_YEAR_INCREMENT:
                                 currentDate = currentDate.AddYears(1);
                                 break;
                             case BotCommands.PARAM_MONTH_DECREMENT:
                                 currentDate = currentDate.AddMonths(-1);
-                                break;
-                            case BotCommands.PARAM_MONTH:
-                                isDayButtonPressed = false;
                                 break;
                             case BotCommands.PARAM_MONTH_INCREMENT:
                                 currentDate = currentDate.AddMonths(1);
@@ -83,8 +77,8 @@ namespace TelegramBot.Handlers
                                 break;
                         }
                     }
-
-                    await BotMessage.SendAnswerCallbackQuery(botClient, update.CallbackQuery.Id, currentDate.ToString("dd.MM.yyyy"));
+                    
+                    await BotMessage.SendAnswerCallbackQuery(botClient, update.CallbackQuery.Id, currentDate.ToString(currentBank.DateFormat));
 
                     if (isDayButtonPressed)
                     {
@@ -94,7 +88,6 @@ namespace TelegramBot.Handlers
                             update.CallbackQuery.Message.MessageId,
                             ReplyKeyboard.InlineDateKeyboard(currentDate));
                     }
-
                     break;
 
                 case BotCommands.CMD_DATECONFIRM:

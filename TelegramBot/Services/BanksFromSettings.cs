@@ -8,7 +8,7 @@ using TelegramBot.Settings;
 
 namespace TelegramBot.Services
 {
-    public class BanksListFromSettings
+    public class BanksFromSettings
     {
 
         public Banks Get()

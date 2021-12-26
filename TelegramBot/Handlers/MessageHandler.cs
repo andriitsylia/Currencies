@@ -32,43 +32,24 @@ namespace TelegramBot.Handlers
 
             switch (command[0])
             {
-                case BotCommands.CMD_MODE:
-                    await CommandModeHandler.Handler(botClient, update, cancellationToken);
-                    break;
-
-                case BotCommands.BUTTON_TEXT:
-                    await BotMessage.SendMessageKeyboard(botClient, chatId, "Bot mode: " + BotCommands.BUTTON_TEXT, new ReplyKeyboardRemove());
-                    await CommandHelpHandler.Handler(botClient, update, cancellationToken);
-                    await BotMessage.SendMessageMarkdown(botClient, chatId, "Type */start*");
-                    break;
-
-                case BotCommands.BUTTON_BUTTON:
-                    await BotMessage.SendMessageKeyboard(botClient, chatId, "Bot mode: " + BotCommands.BUTTON_BUTTON, new ReplyKeyboardRemove());
-                    await BotMessage.SendMessageMarkdownKeyboard(botClient, chatId, "Please, select the _Bank_, the_Date_ and the _Currency_", ReplyKeyboard.MainKeyboard());
-                    _banks = null;
-                    break;
-
                 case BotCommands.CMD_START:
+                    await BotMessage.SendMessageMarkdownKeyboard(
+                        botClient,
+                        chatId,
+                        "Hi\\! Let's go\\!\nSelect the *Bank*, the *Date* and the *Currency*",
+                        ReplyKeyboard.MainKeyboard());
+
+                    _banks = new BanksFromSettings().Get();
                     currentBank = null;
                     currentDate = DateTime.Today;
                     IsDateSelected = false;
                     currentCurrency = string.Empty;
-                    await BotMessage.SendMessageMarkdown(botClient, chatId, "Please, type */bankslist* to output the banks list");
                     break;
 
                 case BotCommands.CMD_BANKSLIST:
-                    _banks = new BanksListFromSettings().Get();
-
-                    StringBuilder message = new();
-                    message.Append("*Please, select the bank*:\n");
-
-                    foreach (var bank in _banks.Items)
-                    {
-                        message.Append(bank.Name + "\n");
-                    }
-                    message.Append("\nType */bank* _bank_");
-
-                    await BotMessage.SendMessageMarkdown(botClient, chatId, message.ToString());
+                    await BotMessage.SendMessage(botClient, chatId, "Select the bank:\n");
+                    await BotMessage.SendMessage(botClient, chatId, _banks.ToString());
+                    await BotMessage.SendMessageMarkdown(botClient, chatId, "Type */bank* _bank_");
                     break;
 
                 case BotCommands.CMD_BANK:
@@ -165,10 +146,9 @@ namespace TelegramBot.Handlers
                     break;
 
                 case BotCommands.BUTTON_BANK:
-                    IsDateSelected = false;
-                    currentCurrency = string.Empty;
+                    //currentCurrency = string.Empty;
 
-                    CallbackQueryHandler._banks = new BanksListFromSettings().Get();
+                    CallbackQueryHandler._banks = new BanksFromSettings().Get();
 
                     await BotMessage.SendMessageKeyboard(
                         botClient,
@@ -208,7 +188,7 @@ namespace TelegramBot.Handlers
                         ReplyKeyboard.InlineCurrencyKeyboard(CallbackQueryHandler.currencyList));
                     break;
 
-                case BotCommands.CMD_HELP:
+                case BotCommands.CMD_HELP or BotCommands.BUTTON_HELP:
                 default:
                     await CommandHelpHandler.Handler(botClient, update, cancellationToken);
                     break;

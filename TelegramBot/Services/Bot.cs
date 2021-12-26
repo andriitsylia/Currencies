@@ -30,7 +30,10 @@ namespace TelegramBot.Services
             User me = await botClient.GetMeAsync();
             Console.Title = me.Username ?? "Telegram currency bot";
 
-            ReceiverOptions receiverOption = new() { AllowedUpdates = new[] { UpdateType.Message, UpdateType.CallbackQuery }, ThrowPendingUpdates = true };
+            ReceiverOptions receiverOption = new()
+            {
+                AllowedUpdates = { }
+            };
             botClient.StartReceiving(MainHandler.HandleUpdateAsync, MainHandler.HandleErrorAsync, receiverOption, cts.Token);
 
             Console.WriteLine($"Start listening for @{me.Username}");
