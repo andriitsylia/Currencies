@@ -24,19 +24,19 @@ namespace TelegramBot.Handlers
         public static PrivatBankRatesSourceModel ratesSource;
         public static CurrencyListServiceModel currencyList;
 
-        public static async Task Handler(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+        public static async Task Handler(ITelegramBotClient botClient, CallbackQuery callbackQuery)
         {
-            var chatId = update.CallbackQuery.Message.Chat.Id;
+            var chatId = callbackQuery.Message.Chat.Id;
 
-            Console.WriteLine("InlineMessageId is " + update.CallbackQuery.Data);
+            Console.WriteLine("InlineMessageId is " + callbackQuery.Data);
 
-            string[] command = update.CallbackQuery.Data.Split(" ");
+            string[] command = callbackQuery.Data.Split(" ");
 
             switch (command[0])
             {
                 case BotCommands.CMD_BANK:
 
-                    await BotMessage.SendAnswerCallbackQuery(botClient, update.CallbackQuery.Id, command[1]);
+                    await BotMessage.SendAnswerCallbackQuery(botClient, callbackQuery.Id, command[1]);
 
                     currentBank = _banks.Items.FirstOrDefault(b => b.Name.ToUpper() == command[1].ToUpper());
 
@@ -78,14 +78,14 @@ namespace TelegramBot.Handlers
                         }
                     }
                     
-                    await BotMessage.SendAnswerCallbackQuery(botClient, update.CallbackQuery.Id, currentDate.ToString(currentBank.DateFormat));
+                    await BotMessage.SendAnswerCallbackQuery(botClient, callbackQuery.Id, currentDate.ToString(currentBank.DateFormat));
 
                     if (isDayButtonPressed)
                     {
                         await BotMessage.EditMessage(
                             botClient,
-                            update.CallbackQuery.Message.Chat.Id,
-                            update.CallbackQuery.Message.MessageId,
+                            callbackQuery.Message.Chat.Id,
+                            callbackQuery.Message.MessageId,
                             ReplyKeyboard.InlineDateKeyboard(currentDate));
                     }
                     break;
@@ -109,7 +109,7 @@ namespace TelegramBot.Handlers
                     break;
 
                 case BotCommands.CMD_CURRENCY:
-                    await BotMessage.SendAnswerCallbackQuery(botClient, update.CallbackQuery.Id, command[1]);
+                    await BotMessage.SendAnswerCallbackQuery(botClient, callbackQuery.Id, command[1]);
 
                     currentCurrency = currencyList?.Currencies.Find(c => !string.IsNullOrWhiteSpace(c) && c.ToUpper() == command[1].ToUpper());
 

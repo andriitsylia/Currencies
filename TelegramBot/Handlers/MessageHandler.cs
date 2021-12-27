@@ -24,10 +24,10 @@ namespace TelegramBot.Handlers
         private static PrivatBankRatesSourceModel ratesSource;
         private static CurrencyListServiceModel currencyList;
 
-        public static async Task Handler(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+        public static async Task Handler(ITelegramBotClient botClient, Message message)
         {
-            var chatId = update.Message.Chat.Id;
-            var messageText = update.Message.Text;
+            var chatId = message.Chat.Id;
+            var messageText = message.Text;
             string[] command = messageText.Split(" ");
 
             switch (command[0])
@@ -150,6 +150,9 @@ namespace TelegramBot.Handlers
 
                     CallbackQueryHandler._banks = new BanksFromSettings().Get();
 
+                    await botClient.SendChatActionAsync(message.Chat.Id, ChatAction.Typing);
+                    await Task.Delay(500);
+
                     await BotMessage.SendMessageKeyboard(
                         botClient,
                         chatId,
@@ -160,13 +163,13 @@ namespace TelegramBot.Handlers
                 case BotCommands.BUTTON_DATE:
                     if (CallbackQueryHandler.currentBank == null)
                     {
-                        await BotMessage.SendMessageMarkdown(botClient, chatId, "Bank isn't selected");
+                        await BotMessage.SendMessage(botClient, chatId, "Bank isn't selected");
                         break;
                     }
 
                     CallbackQueryHandler.currentDate = DateTime.Today;
                     CallbackQueryHandler.currentCurrency = string.Empty;
-                    await BotMessage.SendMessageKeyboard(
+                    await BotMessage.SendMessageMarkdownKeyboard(
                         botClient,
                         chatId,
                         "Select the date, then press *Confirm date* button",
@@ -176,7 +179,7 @@ namespace TelegramBot.Handlers
                 case BotCommands.BUTTON_CURRENCY:
                     if (!CallbackQueryHandler.IsDateSelected)
                     {
-                        await BotMessage.SendMessageMarkdown(botClient, chatId, "Date isn't selected");
+                        await BotMessage.SendMessage(botClient, chatId, "Date isn't selected");
                         break;
                     }
 
@@ -190,7 +193,7 @@ namespace TelegramBot.Handlers
 
                 case BotCommands.CMD_HELP or BotCommands.BUTTON_HELP:
                 default:
-                    await CommandHelpHandler.Handler(botClient, update, cancellationToken);
+                    await CommandHelpHandler.Handler(botClient, message);
                     break;
             }
             Console.WriteLine($"Received a '{messageText}' message in chat {chatId}");

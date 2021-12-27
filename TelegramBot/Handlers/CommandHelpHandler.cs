@@ -12,9 +12,9 @@ namespace TelegramBot.Handlers
 {
     public class CommandHelpHandler
     {
-        public static async Task Handler(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+        public static async Task Handler(ITelegramBotClient botClient, Message message)
         {
-            string message = "*Bot usage:*\n"
+            string usage = "*Bot usage:*\n"
                            + "/start \\- begin\\/restart work with the bot\n"
                            + "/bankslist\n"
                            + "/bank _bank_\n"
@@ -23,11 +23,10 @@ namespace TelegramBot.Handlers
                            + "/help";
 
             Message sentMessage = await botClient.SendTextMessageAsync(
-                       chatId: update.Message.Chat.Id,
-                       text: message,
+                       chatId: message.Chat.Id,
+                       text: usage,
                        parseMode: ParseMode.MarkdownV2,
-                       replyMarkup: null,
-                       cancellationToken: cancellationToken);
+                       replyMarkup: null);
         }
 
     }

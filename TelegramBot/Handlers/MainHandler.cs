@@ -13,19 +13,27 @@ namespace TelegramBot.Handlers
 
         public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-            switch (update.Type)
+            try
             {
-                case UpdateType.CallbackQuery:
-                    await CallbackQueryHandler.Handler(botClient, update, cancellationToken);
-                    break;
-
-                case UpdateType.Message:
-                    await MessageHandler.Handler(botClient, update, cancellationToken);
-                    break;
-
-                default:
-                    break;
+                var handler = update.Type switch
+                {
+                    UpdateType.Message => MessageHandler.Handler(botClient, update.Message),
+                    UpdateType.EditedMessage => MessageHandler.Handler(botClient, update.EditedMessage),
+                    UpdateType.CallbackQuery => CallbackQueryHandler.Handler(botClient, update.CallbackQuery),
+                    _ => UnknownUpdateHandlerAsync(botClient, update)
+                };
+                await handler;
             }
+            catch (Exception ex)
+            {
+                await HandleErrorAsync(botClient, ex, cancellationToken);
+            }
+        }
+
+        private static Task UnknownUpdateHandlerAsync(ITelegramBotClient botClient, Update update)
+        {
+            Console.WriteLine($"Unknown update type: {update.Type}");
+            return Task.CompletedTask;
         }
 
         public static Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
