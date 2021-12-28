@@ -32,7 +32,8 @@ namespace TelegramBot.Services
 
             ReceiverOptions receiverOption = new()
             {
-                AllowedUpdates = { }
+                AllowedUpdates = { },
+                ThrowPendingUpdates = true
             };
             botClient.StartReceiving(MainHandler.HandleUpdateAsync, MainHandler.HandleErrorAsync, receiverOption, cts.Token);
 

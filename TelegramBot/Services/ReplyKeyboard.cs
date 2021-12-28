@@ -55,7 +55,7 @@ namespace TelegramBot.Services
                 {
                     keyboard.Add(new List<InlineKeyboardButton>()
                     {
-                        InlineKeyboardButton.WithCallbackData(text: bank.Name, callbackData: BotCommands.CMD_BANK + " " + bank.Name)
+                        InlineKeyboardButton.WithCallbackData(text: bank.Name, callbackData: $"{BotCommands.CMD_BANK} {bank.Name}")
                     });
                 }
             }
@@ -76,25 +76,25 @@ namespace TelegramBot.Services
                 {
                     InlineKeyboardButton.WithCallbackData(
                         text: BotCommands.BUTTON_DECREMENT,
-                        callbackData: BotCommands.CMD_DATE + " " + BotCommands.PARAM_YEAR_DECREMENT),
+                        callbackData: $"{BotCommands.CMD_DATE} {BotCommands.PARAM_YEAR_DECREMENT}"),
                     InlineKeyboardButton.WithCallbackData(
                         text: date.Year.ToString(),
-                        callbackData: BotCommands.CMD_DATE + " " + BotCommands.PARAM_YEAR),
+                        callbackData: $"{BotCommands.CMD_DATE} {BotCommands.PARAM_YEAR}"),
                     InlineKeyboardButton.WithCallbackData(
                         text: BotCommands.BUTTON_INCREMENT,
-                        callbackData: BotCommands.CMD_DATE + " " + BotCommands.PARAM_YEAR_INCREMENT)
+                        callbackData: $"{BotCommands.CMD_DATE} {BotCommands.PARAM_YEAR_INCREMENT}")
                 },
                 new List<InlineKeyboardButton>()
                 {
                     InlineKeyboardButton.WithCallbackData(
                         text: BotCommands.BUTTON_DECREMENT,
-                        callbackData: BotCommands.CMD_DATE + " " + BotCommands.PARAM_MONTH_DECREMENT),
+                        callbackData: $"{BotCommands.CMD_DATE} {BotCommands.PARAM_MONTH_DECREMENT}"),
                     InlineKeyboardButton.WithCallbackData(
                         text: DateTimeFormatInfo.CurrentInfo.MonthNames[date.Month - 1],
-                        callbackData: BotCommands.CMD_DATE + " " + BotCommands.PARAM_MONTH),
+                        callbackData: $"{BotCommands.CMD_DATE} {BotCommands.PARAM_MONTH}"),
                     InlineKeyboardButton.WithCallbackData(
                         text: BotCommands.BUTTON_INCREMENT,
-                        callbackData: BotCommands.CMD_DATE + " " + BotCommands.PARAM_MONTH_INCREMENT)
+                        callbackData: $"{BotCommands.CMD_DATE} {BotCommands.PARAM_MONTH_INCREMENT}")
                 }
             };
 
@@ -105,7 +105,7 @@ namespace TelegramBot.Services
             {
                 row.Add(InlineKeyboardButton.WithCallbackData(
                     text: BotCommands.BUTTON_EMPTY,
-                    callbackData: BotCommands.CMD_DATE + " " + BotCommands.PARAM_EMPTY));
+                    callbackData: $"{BotCommands.CMD_DATE} {BotCommands.PARAM_EMPTY}"));
             }
             for (int i = 1; i <= days; i++)
             {
@@ -116,20 +116,20 @@ namespace TelegramBot.Services
                 }
                 row.Add(InlineKeyboardButton.WithCallbackData(
                     text: i.ToString(),
-                    callbackData: BotCommands.CMD_DATE + " " + i.ToString()));
+                    callbackData: $"{BotCommands.CMD_DATE} {i}"));
             }
             for (int i = row.Count + 1; i <= BUTTONS_IN_WEEK; i++)
             {
                 row.Add(InlineKeyboardButton.WithCallbackData(
                     text: BotCommands.BUTTON_EMPTY,
-                    callbackData: BotCommands.CMD_DATE + " " + BotCommands.PARAM_EMPTY));
+                    callbackData: $"{BotCommands.CMD_DATE} {BotCommands.PARAM_EMPTY}"));
             }
             keyboard.Add(row);
 
             row = new List<InlineKeyboardButton>()
             {
                 InlineKeyboardButton.WithCallbackData(
-                    text: BotCommands.BUTTON_DATECONFIRM,
+                    text: $"{BotCommands.BUTTON_DATECONFIRM} {date:d}",
                     callbackData: BotCommands.CMD_DATECONFIRM)
             };
             keyboard.Add(row);
@@ -155,7 +155,7 @@ namespace TelegramBot.Services
                     }
                     row.Add(InlineKeyboardButton.WithCallbackData(
                         text: currency,
-                        callbackData: BotCommands.CMD_CURRENCY + " " + currency));
+                        callbackData: $"{BotCommands.CMD_CURRENCY} {currency}"));
                 }
             }
             keyboard.Add(row);

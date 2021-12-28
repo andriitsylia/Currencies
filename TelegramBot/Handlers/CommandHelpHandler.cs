@@ -15,11 +15,12 @@ namespace TelegramBot.Handlers
         public static async Task Handler(ITelegramBotClient botClient, Message message)
         {
             string usage = "*Bot usage:*\n"
-                           + "/start \\- begin\\/restart work with the bot\n"
-                           + "/bankslist\n"
-                           + "/bank _bank_\n"
-                           + "/date _dd\\.mm\\.yyyy_\n"
-                           + "/currency _currency_\n"
+                           + "/start \\- restart the bot\n"
+                           + "/bank \\- show banks list\n"
+                           + "/bank _bank_ \\- select bank\n"
+                           + "/date _dd\\.mm\\.yyyy_ \\- select date\n"
+                           + "/date _today_ \\- select date\n"
+                           + "/currency _currency_ \\- select currency\n"
                            + "/help";
 
             Message sentMessage = await botClient.SendTextMessageAsync(
