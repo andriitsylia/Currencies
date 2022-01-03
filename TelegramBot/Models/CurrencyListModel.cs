@@ -16,7 +16,7 @@ namespace TelegramBot.Models
         {
             Bank = rates.Bank;
             Date = rates.Date.ToString();
-            Currencies = rates.Rates.Select(c => c.Currency).ToList();
+            Currencies = rates.Rates.OrderBy(o => o.Currency.ToString()).Select(c => c.Currency).ToList();
         }
 
         public string GetCurrency(string currency)
