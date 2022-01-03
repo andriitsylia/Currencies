@@ -23,5 +23,10 @@ namespace TelegramBot.Models
             _date = currencyRates.date;
             _currencies = currencyRates.exchangeRate.Select(c => c.currency).ToList<string>();
         }
+
+        public string GetCurrency(string currency)
+        {
+            return _currencies.Find(c => !string.IsNullOrWhiteSpace(c) && c.ToUpper() == currency.ToUpper());
+        }
     }
 }

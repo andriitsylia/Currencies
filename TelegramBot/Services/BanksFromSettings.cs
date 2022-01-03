@@ -16,7 +16,7 @@ namespace TelegramBot.Services
             Banks banks = new();
             IConfiguration mainSettings = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
             banks.Items = mainSettings.GetSection("Bank").Get<IEnumerable<Bank>>();
-            
+           
             return banks;
         }
     }

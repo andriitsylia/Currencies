@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBot.Models;
 using TelegramBot.Settings;
@@ -30,20 +27,6 @@ namespace TelegramBot.Services
                 ResizeKeyboard = true
             };
         }
-
-        //public static ReplyKeyboardMarkup ModeKeyboard()
-        //{
-        //    return new(new[]
-        //    {
-        //        new KeyboardButton[] {
-        //            BotCommands.BUTTON_TEXT,
-        //            BotCommands.BUTTON_BUTTON
-        //        }
-        //    })
-        //    {
-        //        ResizeKeyboard = true
-        //    };
-        //}
 
         public static InlineKeyboardMarkup InlineBanksKeyboard(Banks banks)
         {
