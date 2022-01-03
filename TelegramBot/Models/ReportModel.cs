@@ -1,33 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TelegramBot.Models
 {
     public class ReportModel
     {
-        private readonly string _report;
-        private readonly CurrencyRateServiceModel _currencyRate;
+        public RateServiceModel Rate { get; }
 
-        public string Report
+        public string Report { get; }
+
+        public ReportModel(RateServiceModel rate)
         {
-            get => _report;
+            Rate = rate ?? throw new ArgumentNullException(nameof(rate), "Received a null argument");
+            Report = Make();
         }
 
-        public ReportModel(CurrencyRateServiceModel currencyRate)
+        private string Make()
         {
-            _currencyRate = currencyRate ?? throw new ArgumentNullException(nameof(currencyRate), "Received a null argument");
-            _report = Create();
-        }
-
-        private string Create()
-        {
-            StringBuilder result = new StringBuilder();
-            result.Append($"Курс {_currencyRate.Currency} у відношенні до {_currencyRate.BaseCurrency} cтаном на {_currencyRate.Date} року\n");
-            result.Append($"Купівля: {_currencyRate.PurchaseRate:F4}\nПродаж: {_currencyRate.SaleRate:F4}\n");
-            return result.ToString();
+            return $"Курс {Rate.Currency} у відношенні до {Rate.BaseCurrency} cтановить:\n" +
+                   $"Купівля: {Rate.Purchase:F4}\n" +
+                   $"Продаж: {Rate.Sale:F4}\n";
         }
     }
 }

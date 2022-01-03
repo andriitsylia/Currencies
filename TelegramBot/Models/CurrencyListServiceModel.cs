@@ -8,25 +8,20 @@ namespace TelegramBot.Models
 {
     public class CurrencyListServiceModel
     {
-        private readonly string _bank;
-        private readonly List<string> _currencies;
-        private readonly string _date;
+        public string Bank { get; }
+        public List<Currency> Currencies { get; }
+        public string Date;
 
-        public List<string> Currencies
+        public CurrencyListServiceModel(RatesServiceModel rates)
         {
-            get => _currencies;
-        }
-
-        public CurrencyListServiceModel(PrivatBankRatesSourceModel currencyRates)
-        {
-            _bank = currencyRates.bank;
-            _date = currencyRates.date;
-            _currencies = currencyRates.exchangeRate.Select(c => c.currency).ToList<string>();
+            Bank = rates.Bank;
+            Date = rates.Date.ToString();
+            Currencies = rates.Rates.Select(c => c.Currency).ToList<Currency>();
         }
 
         public string GetCurrency(string currency)
         {
-            return _currencies.Find(c => !string.IsNullOrWhiteSpace(c) && c.ToUpper() == currency.ToUpper());
+            return Currencies.Find(c => c.ToString().ToUpper() == currency.ToUpper()).ToString();
         }
     }
 }

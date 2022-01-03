@@ -129,17 +129,17 @@ namespace TelegramBot.Services
             List<List<InlineKeyboardButton>> keyboard = new();
             foreach (var currency in currencyList.Currencies)
             {
-                if (!string.IsNullOrWhiteSpace(currency))
-                {
+                //if (!string.IsNullOrWhiteSpace(currency))
+                //{
                     if (row.Count == BUTTONS_IN_ROW)
                     {
                         keyboard.Add(row);
                         row = new List<InlineKeyboardButton>();
                     }
                     row.Add(InlineKeyboardButton.WithCallbackData(
-                        text: currency,
+                        text: currency.ToString(),
                         callbackData: $"{BotCommand.CMD_CURRENCY} {currency}"));
-                }
+                //}
             }
             keyboard.Add(row);
 

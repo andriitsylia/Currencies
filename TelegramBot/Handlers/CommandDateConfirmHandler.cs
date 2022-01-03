@@ -8,9 +8,6 @@ namespace TelegramBot.Handlers
 {
     public class CommandDateConfirmHandler
     {
-        public static PrivatBankRatesSourceModel ratesSource;
-        public static CurrencyListServiceModel currencyList;
-
         public static async Task Handler(ITelegramBotClient botClient, Message message, string cmd, CurrentSession current)
         {
             await BotMessage.SendMessage(

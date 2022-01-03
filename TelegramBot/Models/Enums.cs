@@ -1,7 +1,7 @@
 ﻿namespace TelegramBot.Models
 {
 
-    public enum Currency : int
+    public enum Currency
     {
         AUD = 036, // Австралийский доллар
         AZN = 944, // Азербайджанский манат

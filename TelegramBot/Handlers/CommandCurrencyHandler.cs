@@ -12,7 +12,7 @@ namespace TelegramBot.Handlers
 {
     public class CommandCurrencyHandler
     {
-        public static PrivatBankRatesSourceModel ratesSource;
+        public static RatesServiceModel rates;
         public static CurrencyListServiceModel currencyList;
 
         public static async Task Handler(ITelegramBotClient botClient, Message message, string cmd, CurrentSession currentSession)
@@ -22,9 +22,8 @@ namespace TelegramBot.Handlers
 
             if (command.Length == 1)
             {
-                //ratesSource = JsonRatesParse.Parse(current.Bank, current.Date);
-                ratesSource = new BankRates(currentSession.Bank).Get(currentSession.Date).Result;
-                currencyList = new CurrencyListServiceModel(ratesSource);
+                rates = new BankRates(currentSession.Bank).Get(currentSession.Date).Result;
+                currencyList = new CurrencyListServiceModel(rates);
 
                 if (currencyList.Currencies.Count == 0)
                 {
@@ -48,8 +47,8 @@ namespace TelegramBot.Handlers
 
             if (!string.IsNullOrWhiteSpace(currentSession.Currency))
             {
-                CurrencyRateServiceModel currencyRate = new(ratesSource, currentSession.Currency);
-                ReportModel rep = new(currencyRate);
+                //CurrencyRateServiceModel currencyRate = new(rates, currentSession.Currency);
+                ReportModel rep = new(rates.GetRate(currentSession.Currency));
                 await BotMessage.SendMessage(botClient, chatId, rep.Report);
             }
             else

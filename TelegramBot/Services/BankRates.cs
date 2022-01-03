@@ -18,12 +18,45 @@ namespace TelegramBot.Services
             _client = new HttpClient();
         }
 
-        public async Task<PrivatBankRatesSourceModel> Get(DateTime date)
+        public async Task<RatesServiceModel> Get(DateTime date)
         {
             string jsonData = await GetPerDateAsJson(date);
             JsonElement root = JsonDocument.Parse(jsonData).RootElement;
+            RatesServiceModel rates; 
+            switch (_bank.Name)
+            {
+                case "NBU":
+                    throw new NotImplementedException();
+                    break;
 
-            return JsonSerializer.Deserialize<PrivatBankRatesSourceModel>(root.ToString());
+                case "Privatbank":
+                    PrivatBankRatesSourceModel privatBankRates = JsonSerializer.Deserialize<PrivatBankRatesSourceModel>(root.ToString());
+                    rates = Parse(privatBankRates, date);
+                    break;
+                case "Monobank":
+                    throw new NotImplementedException();
+                    break;
+
+                default:
+                    throw new NotImplementedException();
+                    break;
+            }
+            return rates;
+        }
+
+        private RatesServiceModel Parse(PrivatBankRatesSourceModel privatBankRates, DateTime date)
+        {
+            RatesServiceModel rates = new(_bank.Name, date);
+            foreach (var rate in privatBankRates.exchangeRate)
+            {
+                if (Enum.TryParse(typeof(Currency), rate.currency, true, out object currency) &&
+                    Enum.TryParse(typeof(Currency), rate.baseCurrency, true, out object baseCurrency))
+                {
+                    rates.Rates.Add(new RateServiceModel((Currency)currency, (Currency)baseCurrency, rate.purchaseRate, rate.saleRate));
+                }
+            }
+            return rates;
+
         }
 
         public async Task<string> GetPerDateAsJson(DateTime date)
