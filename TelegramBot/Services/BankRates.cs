@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -26,7 +27,8 @@ namespace TelegramBot.Services
             switch (_bank.Name)
             {
                 case "NBU":
-                    throw new NotImplementedException();
+                    NBURatesSourceModel nbuRates = new(JsonSerializer.Deserialize<List<NBURateSourceModel>>(root.ToString()));
+                    rates = Parse(nbuRates, date);
                     break;
 
                 case "Privatbank":
@@ -44,6 +46,21 @@ namespace TelegramBot.Services
             return rates;
         }
 
+        private RatesServiceModel Parse(NBURatesSourceModel nbuRates, DateTime date)
+        {
+            RatesServiceModel rates = new(_bank.Name, date);
+            Currency baseCurrency = Currency.UAH;
+
+            foreach (var rate in nbuRates.Rates)
+            {
+                if (Enum.TryParse(typeof(Currency), rate.CurrencyCodeL, true, out object currency))
+                {
+                    rates.Rates.Add(new RateServiceModel((Currency)currency, baseCurrency, rate.Amount/rate.Units, rate.Amount / rate.Units));
+                }
+            }
+            return rates;
+        }
+
         private RatesServiceModel Parse(PrivatBankRatesSourceModel privatBankRates, DateTime date)
         {
             RatesServiceModel rates = new(_bank.Name, date);
@@ -56,7 +73,6 @@ namespace TelegramBot.Services
                 }
             }
             return rates;
-
         }
 
         public async Task<string> GetPerDateAsJson(DateTime date)
@@ -75,7 +91,5 @@ namespace TelegramBot.Services
                 throw new NotImplementedException();
             }
         }
-
-
     }
 }
