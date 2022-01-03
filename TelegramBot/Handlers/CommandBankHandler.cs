@@ -20,7 +20,7 @@ namespace TelegramBot.Handlers
             var messageText = message.Text;
             string[] command = cmd.Split(" ");
 
-            Banks banks = new BanksFromSettings().Get();
+            Banks banks = new BanksSettings().Get();
 
             if (banks == null)
             {

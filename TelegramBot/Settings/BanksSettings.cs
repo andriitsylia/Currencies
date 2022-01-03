@@ -4,11 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TelegramBot.Settings;
 
-namespace TelegramBot.Services
+namespace TelegramBot.Settings
 {
-    public class BanksFromSettings
+    public class BanksSettings
     {
 
         public Banks Get()
@@ -16,7 +15,7 @@ namespace TelegramBot.Services
             Banks banks = new();
             IConfiguration mainSettings = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
             banks.Items = mainSettings.GetSection("Bank").Get<IEnumerable<Bank>>();
-           
+
             return banks;
         }
     }

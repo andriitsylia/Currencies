@@ -43,16 +43,16 @@ namespace TelegramBot.Handlers
             {
                 switch (command[1])
                 {
-                    case BotCommands.PARAM_YEAR_DECREMENT:
+                    case Services.BotCommand.PARAM_YEAR_DECREMENT:
                         current.Date = current.Date.AddYears(-1);
                         break;
-                    case BotCommands.PARAM_YEAR_INCREMENT:
+                    case Services.BotCommand.PARAM_YEAR_INCREMENT:
                         current.Date = current.Date.AddYears(1);
                         break;
-                    case BotCommands.PARAM_MONTH_DECREMENT:
+                    case Services.BotCommand.PARAM_MONTH_DECREMENT:
                         current.Date = current.Date.AddMonths(-1);
                         break;
-                    case BotCommands.PARAM_MONTH_INCREMENT:
+                    case Services.BotCommand.PARAM_MONTH_INCREMENT:
                         current.Date = current.Date.AddMonths(1);
                         break;
                     default:

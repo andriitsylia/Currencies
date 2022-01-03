@@ -15,19 +15,23 @@ namespace TelegramBot.Handlers
         public static PrivatBankRatesSourceModel ratesSource;
         public static CurrencyListServiceModel currencyList;
 
-        public static async Task Handler(ITelegramBotClient botClient, Message message, string cmd, CurrentSession current)
+        public static async Task Handler(ITelegramBotClient botClient, Message message, string cmd, CurrentSession currentSession)
         {
             var chatId = message.Chat.Id;
             string[] command = cmd.Split(" ");
 
             if (command.Length == 1)
             {
-                ratesSource = JsonRatesParse.Parse(current.Bank, current.Date); 
+                //ratesSource = JsonRatesParse.Parse(current.Bank, current.Date);
+                ratesSource = new BankRates(currentSession.Bank).Get(currentSession.Date).Result;
                 currencyList = new CurrencyListServiceModel(ratesSource);
 
                 if (currencyList.Currencies.Count == 0)
                 {
-                    await BotMessage.SendMessage(botClient, chatId, $"No currency rates on {current.Date.ToString(current.Bank.DateFormat)}");
+                    await BotMessage.SendMessage(
+                        botClient,
+                        chatId,
+                        $"No currency rates on {currentSession.Date.ToString(currentSession.Bank.DateFormat)}");
                     return;
                 }
 
@@ -40,11 +44,11 @@ namespace TelegramBot.Handlers
                 return;
             }
 
-            current.Currency = currencyList.GetCurrency(command[1]);
+            currentSession.Currency = currencyList.GetCurrency(command[1]);
 
-            if (!string.IsNullOrWhiteSpace(current.Currency))
+            if (!string.IsNullOrWhiteSpace(currentSession.Currency))
             {
-                CurrencyRateServiceModel currencyRate = new(ratesSource, current.Currency);
+                CurrencyRateServiceModel currencyRate = new(ratesSource, currentSession.Currency);
                 ReportModel rep = new(currencyRate);
                 await BotMessage.SendMessage(botClient, chatId, rep.Report);
             }

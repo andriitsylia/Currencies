@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TelegramBot.Services
 {
-    public class BotCommands
+    public class BotCommand
     {
         public const string CMD_MODE = "/mode";
         public const string CMD_START = "/start";

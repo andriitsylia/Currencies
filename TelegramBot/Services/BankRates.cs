@@ -1,23 +1,29 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using TelegramBot.Models;
 using TelegramBot.Settings;
 
 namespace TelegramBot.Services
 {
-    public class BankCurrencyRates
+    public class BankRates
     {
         private HttpClient _client;
         private Bank _bank;
 
-        public BankCurrencyRates(Bank bank)
+        public BankRates(Bank bank)
         {
             _bank = bank ?? throw new ArgumentNullException(nameof(bank), "Received a null argument");
             _client = new HttpClient();
+        }
+
+        public async Task<PrivatBankRatesSourceModel> Get(DateTime date)
+        {
+            string jsonData = await GetPerDateAsJson(date);
+            JsonElement root = JsonDocument.Parse(jsonData).RootElement;
+
+            return JsonSerializer.Deserialize<PrivatBankRatesSourceModel>(root.ToString());
         }
 
         public async Task<string> GetPerDateAsJson(DateTime date)
@@ -36,5 +42,7 @@ namespace TelegramBot.Services
                 throw new NotImplementedException();
             }
         }
+
+
     }
 }
