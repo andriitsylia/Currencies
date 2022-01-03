@@ -19,57 +19,51 @@ namespace TelegramBot.Services
             _client = new HttpClient();
         }
 
-        public async Task<RatesServiceModel> Get(DateTime date)
+        public async Task<RatesModel> Get(DateTime date)
         {
             string jsonData = await GetPerDateAsJson(date);
             JsonElement root = JsonDocument.Parse(jsonData).RootElement;
-            RatesServiceModel rates; 
+            RatesModel rates; 
             switch (_bank.Name)
             {
                 case "NBU":
-                    NBURatesSourceModel nbuRates = new(JsonSerializer.Deserialize<List<NBURateSourceModel>>(root.ToString()));
+                    NBURatesModel nbuRates = new(JsonSerializer.Deserialize<List<NBURateModel>>(root.ToString()));
                     rates = Parse(nbuRates, date);
                     break;
 
                 case "Privatbank":
-                    PrivatBankRatesSourceModel privatBankRates = JsonSerializer.Deserialize<PrivatBankRatesSourceModel>(root.ToString());
-                    rates = Parse(privatBankRates, date);
-                    break;
-                case "Monobank":
-                    throw new NotImplementedException();
-                    break;
-
                 default:
-                    throw new NotImplementedException();
+                    PrivatBankRatesModel privatBankRates = JsonSerializer.Deserialize<PrivatBankRatesModel>(root.ToString());
+                    rates = Parse(privatBankRates, date);
                     break;
             }
             return rates;
         }
 
-        private RatesServiceModel Parse(NBURatesSourceModel nbuRates, DateTime date)
+        private RatesModel Parse(NBURatesModel nbuRates, DateTime date)
         {
-            RatesServiceModel rates = new(_bank.Name, date);
+            RatesModel rates = new(_bank.Name, date);
             Currency baseCurrency = Currency.UAH;
 
             foreach (var rate in nbuRates.Rates)
             {
                 if (Enum.TryParse(typeof(Currency), rate.CurrencyCodeL, true, out object currency))
                 {
-                    rates.Rates.Add(new RateServiceModel((Currency)currency, baseCurrency, rate.Amount/rate.Units, rate.Amount / rate.Units));
+                    rates.Rates.Add(new RateModel((Currency)currency, baseCurrency, rate.Amount/rate.Units, rate.Amount / rate.Units));
                 }
             }
             return rates;
         }
 
-        private RatesServiceModel Parse(PrivatBankRatesSourceModel privatBankRates, DateTime date)
+        private RatesModel Parse(PrivatBankRatesModel privatBankRates, DateTime date)
         {
-            RatesServiceModel rates = new(_bank.Name, date);
+            RatesModel rates = new(_bank.Name, date);
             foreach (var rate in privatBankRates.exchangeRate)
             {
                 if (Enum.TryParse(typeof(Currency), rate.currency, true, out object currency) &&
                     Enum.TryParse(typeof(Currency), rate.baseCurrency, true, out object baseCurrency))
                 {
-                    rates.Rates.Add(new RateServiceModel((Currency)currency, (Currency)baseCurrency, rate.purchaseRate, rate.saleRate));
+                    rates.Rates.Add(new RateModel((Currency)currency, (Currency)baseCurrency, rate.purchaseRate, rate.saleRate));
                 }
             }
             return rates;

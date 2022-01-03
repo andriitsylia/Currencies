@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TelegramBot.Models
 {
-    public class NBURateSourceModel
+    public class NBURateModel
     {
         public string StartDate { get; set; }
         public string TimeSign { get; set; }

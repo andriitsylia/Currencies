@@ -6,17 +6,17 @@ using System.Threading.Tasks;
 
 namespace TelegramBot.Models
 {
-    public class CurrencyListServiceModel
+    public class CurrencyListModel
     {
         public string Bank { get; }
         public List<Currency> Currencies { get; }
         public string Date;
 
-        public CurrencyListServiceModel(RatesServiceModel rates)
+        public CurrencyListModel(RatesModel rates)
         {
             Bank = rates.Bank;
             Date = rates.Date.ToString();
-            Currencies = rates.Rates.Select(c => c.Currency).ToList<Currency>();
+            Currencies = rates.Rates.Select(c => c.Currency).ToList();
         }
 
         public string GetCurrency(string currency)

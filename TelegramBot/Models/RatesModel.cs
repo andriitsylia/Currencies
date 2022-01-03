@@ -6,25 +6,25 @@ using System.Threading.Tasks;
 
 namespace TelegramBot.Models
 {
-    public class RatesServiceModel
+    public class RatesModel
     {
         public string Bank { get; set; }
         public DateTime Date { get; set; }
-        public List<RateServiceModel> Rates { get; set; }
+        public List<RateModel> Rates { get; set; }
 
-        public RatesServiceModel(string bank, DateTime date)
+        public RatesModel(string bank, DateTime date)
         {
             Bank = bank;
             Date = date;
-            Rates = new List<RateServiceModel>();
+            Rates = new List<RateModel>();
         }
 
-        public RateServiceModel GetRate(string currency)
+        public RateModel GetRate(string currency)
         {
             return Rates.Find(c => c.Currency.ToString().ToUpper() == currency.ToUpper());
         }
 
-        public RateServiceModel GetRate(Currency currenncy)
+        public RateModel GetRate(Currency currenncy)
         {
             return Rates.Find(c => c.Currency == currenncy);
         }

@@ -4,11 +4,11 @@ namespace TelegramBot.Models
 {
     public class ReportModel
     {
-        public RateServiceModel Rate { get; }
+        public RateModel Rate { get; }
 
         public string Report { get; }
 
-        public ReportModel(RateServiceModel rate)
+        public ReportModel(RateModel rate)
         {
             Rate = rate ?? throw new ArgumentNullException(nameof(rate), "Received a null argument");
             Report = Make();

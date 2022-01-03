@@ -122,24 +122,21 @@ namespace TelegramBot.Services
             return inlineKeyboardMarkup;
         }
 
-        public static InlineKeyboardMarkup InlineCurrencyKeyboard(CurrencyListServiceModel currencyList)
+        public static InlineKeyboardMarkup InlineCurrencyKeyboard(CurrencyListModel currencyList)
         {
             InlineKeyboardMarkup inlineKeyboardMarkup;
             List<InlineKeyboardButton> row = new();
             List<List<InlineKeyboardButton>> keyboard = new();
             foreach (var currency in currencyList.Currencies)
             {
-                //if (!string.IsNullOrWhiteSpace(currency))
-                //{
-                    if (row.Count == BUTTONS_IN_ROW)
-                    {
-                        keyboard.Add(row);
-                        row = new List<InlineKeyboardButton>();
-                    }
-                    row.Add(InlineKeyboardButton.WithCallbackData(
-                        text: currency.ToString(),
-                        callbackData: $"{BotCommand.CMD_CURRENCY} {currency}"));
-                //}
+                if (row.Count == BUTTONS_IN_ROW)
+                {
+                    keyboard.Add(row);
+                    row = new List<InlineKeyboardButton>();
+                }
+                row.Add(InlineKeyboardButton.WithCallbackData(
+                    text: currency.ToString(),
+                    callbackData: $"{BotCommand.CMD_CURRENCY} {currency}"));
             }
             keyboard.Add(row);
 
