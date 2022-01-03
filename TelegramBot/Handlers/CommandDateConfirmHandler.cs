@@ -8,12 +8,12 @@ namespace TelegramBot.Handlers
 {
     public class CommandDateConfirmHandler
     {
-        public static async Task Handler(ITelegramBotClient botClient, Message message, string cmd, CurrentSession current)
+        public static async Task Handler(ITelegramBotClient botClient, Message message, string cmd, CurrentSession currentSession)
         {
             await BotMessage.SendMessage(
                 botClient,
                 message.Chat.Id,
-                $"{current.Date.ToString(current.Bank.DateFormat)} is selected");
+                $"Date {currentSession.Date.ToString(currentSession.Bank.DateFormat)} is selected");
         }
     }
 }

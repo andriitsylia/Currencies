@@ -8,9 +8,7 @@ namespace TelegramBot.Services
 {
     public class BotCommand
     {
-        public const string CMD_MODE = "/mode";
         public const string CMD_START = "/start";
-        public const string CMD_BANKSLIST = "/bankslist";
         public const string CMD_BANK = "/bank";
         public const string CMD_DATE = "/date";
         public const string CMD_DATECONFIRM = "/dateconfirm";
@@ -27,22 +25,16 @@ namespace TelegramBot.Services
         public const string PARAM_MONTH_DECREMENT = "month-";
         public const string PARAM_MONTH_INCREMENT = "month+";
 
-
-        public const string BUTTON_TEXT = "Text";
-        public const string BUTTON_BUTTON = "Button";
         public const string BUTTON_BANK = "Bank";
         public const string BUTTON_DATE = "Date";
         public const string BUTTON_CURRENCY = "Currency";
-        public const string BUTTON_HELP = "Help";
         public const string BUTTON_EMPTY = " ";
         public const string BUTTON_DECREMENT = "-";
         public const string BUTTON_INCREMENT = "+";
         public const string BUTTON_DATECONFIRM = "Confirm date";
 
         private static string[] commands = {
-            CMD_MODE,
             CMD_START,
-            CMD_BANKSLIST,
             CMD_BANK,
             CMD_DATE,
             CMD_DATECONFIRM,
@@ -63,8 +55,6 @@ namespace TelegramBot.Services
         };
 
         private static string[] buttons = {
-            BUTTON_TEXT,
-            BUTTON_BUTTON,
             BUTTON_BANK,
             BUTTON_DATE,
             BUTTON_CURRENCY,

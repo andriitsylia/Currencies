@@ -45,11 +45,7 @@ namespace TelegramBot.Handlers
                 case Services.BotCommand.CMD_START:
                     await CommandHelpHandler.Handler(botClient, message);
                     currentSession = new CurrentSession();
-                    await BotMessage.SendMessageMarkdownKeyboard(
-                        botClient,
-                        chatId,
-                        "Select the *Bank*, the *Date* and the *Currency*",
-                        ReplyKeyboard.MainKeyboard());
+                    await CommandStartHandler.Handler(botClient, message);
                     break;
 
                 case Services.BotCommand.CMD_BANK:
@@ -76,7 +72,7 @@ namespace TelegramBot.Handlers
                     await CommandCurrencyHandler.Handler(botClient, message, messageText, currentSession);
                     break;
 
-                case Services.BotCommand.CMD_HELP or Services.BotCommand.BUTTON_HELP:
+                case Services.BotCommand.CMD_HELP:
                 default:
                     await CommandHelpHandler.Handler(botClient, message);
                     break;

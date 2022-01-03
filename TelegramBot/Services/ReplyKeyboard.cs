@@ -19,8 +19,7 @@ namespace TelegramBot.Services
                 new KeyboardButton[] {
                     BotCommand.BUTTON_BANK,
                     BotCommand.BUTTON_DATE,
-                    BotCommand.BUTTON_CURRENCY,
-                    BotCommand.BUTTON_HELP
+                    BotCommand.BUTTON_CURRENCY
                 }
             })
             {

@@ -7,13 +7,13 @@ namespace TelegramBot.Models
     {
         public Bank Bank { get; set; }
         public DateTime Date { get; set; }
-        public string Currency { get; set; }
+        public Currency Currency { get; set; }
 
         public CurrentSession()
         {
             Bank = null;
             Date = DateTime.Today;
-            Currency = string.Empty;
+            Currency = Currency.UAH;
         }
     }
 }

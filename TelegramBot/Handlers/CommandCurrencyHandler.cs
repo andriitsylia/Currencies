@@ -42,17 +42,15 @@ namespace TelegramBot.Handlers
 
                 return;
             }
-
-            currentSession.Currency = currencyList.GetCurrency(command[1]);
-
-            if (!string.IsNullOrWhiteSpace(currentSession.Currency))
+            if (currencyList.IsValidCurrency(command[1]))
             {
-                ReportModel rep = new(rates.GetRate(currentSession.Currency));
-                await BotMessage.SendMessage(botClient, chatId, rep.Report);
+                currentSession.Currency = currencyList.GetCurrency(command[1]);
+                ReportModel report = new(rates.GetRate(currentSession.Currency));
+                await BotMessage.SendMessage(botClient, chatId, report.Report);
             }
             else
             {
-                await BotMessage.SendMessageMarkdown(botClient, chatId, $"Currency _{command[1]}_ is not present");
+                await BotMessage.SendMessageMarkdown(botClient, chatId, $"Currency *{command[1].ToUpper()}* is not exist");
             }
         }
     }
