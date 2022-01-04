@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -21,8 +22,9 @@ namespace TelegramBot.Services
 
         public async Task<RatesModel> Get(DateTime date)
         {
-            string jsonData = await GetPerDateAsJson(date);
+            string jsonData = await GetJsonData(date);
             JsonElement root = JsonDocument.Parse(jsonData).RootElement;
+
             RatesModel rates; 
             switch (_bank.Name)
             {
@@ -42,7 +44,7 @@ namespace TelegramBot.Services
 
         private RatesModel Parse(NBURatesModel nbuRates, DateTime date)
         {
-            RatesModel rates = new(_bank.Name, date);
+            RatesModel rates = new(_bank, date);
             Currency baseCurrency = Currency.UAH;
 
             foreach (var rate in nbuRates.Rates)
@@ -57,7 +59,7 @@ namespace TelegramBot.Services
 
         private RatesModel Parse(PrivatBankRatesModel privatBankRates, DateTime date)
         {
-            RatesModel rates = new(_bank.Name, date);
+            RatesModel rates = new(_bank, date);
             foreach (var rate in privatBankRates.exchangeRate)
             {
                 if (Enum.TryParse(typeof(Currency), rate.currency, true, out object currency) &&
@@ -69,7 +71,7 @@ namespace TelegramBot.Services
             return rates;
         }
 
-        public async Task<string> GetPerDateAsJson(DateTime date)
+        private async Task<string> GetJsonData(DateTime date)
         {
             _client.BaseAddress = new Uri(_bank.ConnectionAddress + date.Date.ToString(_bank.DateFormat));
             _client.DefaultRequestHeaders.Accept.Clear();
@@ -82,7 +84,8 @@ namespace TelegramBot.Services
             }
             else
             {
-                throw new NotImplementedException();
+                throw new Exception($"HTTP status code {httpResponseMessage.StatusCode}: " +
+                                    $"{Enum.GetName(typeof(HttpStatusCode), httpResponseMessage.StatusCode)}");
             }
         }
     }

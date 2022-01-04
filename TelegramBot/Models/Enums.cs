@@ -1,6 +1,5 @@
 ﻿namespace TelegramBot.Models
 {
-
     public enum Currency
     {
         AUD = 036, // Австралийский доллар
@@ -166,6 +165,5 @@
         SSP = 728, // Южносуданский фунт
         JMD = 388, // Ямайский доллар
         JPY = 392  // Японская йена
-
     }
 }

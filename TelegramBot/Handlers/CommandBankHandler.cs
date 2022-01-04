@@ -12,7 +12,6 @@ namespace TelegramBot.Handlers
         public static async Task Handler(ITelegramBotClient botClient, Message message, string cmd, CurrentSession currentSession)
         {
             var chatId = message.Chat.Id;
-            var messageText = message.Text;
             string[] command = cmd.Split(" ");
 
             Banks banks = new BanksSettings().Get();
@@ -30,10 +29,9 @@ namespace TelegramBot.Handlers
                     chatId,
                     "Select the bank",
                     ReplyKeyboard.InlineBanksKeyboard(banks));
-
                 return;
             }
-            
+
             currentSession.Bank = banks.GetBank(command[1]);
 
             if (currentSession.Bank != null)
@@ -44,7 +42,6 @@ namespace TelegramBot.Handlers
             {
                 await BotMessage.SendMessageMarkdown(botClient, chatId, $"Bank *{command[1].ToUpper()}* is not exist");
             }
-
         }
     }
 }

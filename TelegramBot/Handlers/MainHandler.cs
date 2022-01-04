@@ -44,8 +44,8 @@ namespace TelegramBot.Handlers
             {
                 case Services.BotCommand.CMD_START:
                     await CommandHelpHandler.Handler(botClient, message);
-                    currentSession = new CurrentSession();
                     await CommandStartHandler.Handler(botClient, message);
+                    currentSession = new CurrentSession();
                     break;
 
                 case Services.BotCommand.CMD_BANK:
@@ -100,7 +100,7 @@ namespace TelegramBot.Handlers
 
                 case Services.BotCommand.CMD_DATECONFIRM:
                     await BotMessage.SendAnswerCallbackQuery(botClient, callbackQuery.Id);
-                    await CommandDateConfirmHandler.Handler(botClient, message, callbackQuery.Data, currentSession);
+                    await CommandDateConfirmHandler.Handler(botClient, message, currentSession);
                     break;
 
                 case Services.BotCommand.CMD_CURRENCY:

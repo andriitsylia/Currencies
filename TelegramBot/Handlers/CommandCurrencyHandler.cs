@@ -42,9 +42,9 @@ namespace TelegramBot.Handlers
 
                 return;
             }
-            if (currencyList.IsValidCurrency(command[1]))
+            if (currencyList.IsValid(command[1]))
             {
-                currentSession.Currency = currencyList.GetCurrency(command[1]);
+                currentSession.Currency = currencyList.Get(command[1]);
                 ReportModel report = new(rates.GetRate(currentSession.Currency));
                 await BotMessage.SendMessage(botClient, chatId, report.Report);
             }

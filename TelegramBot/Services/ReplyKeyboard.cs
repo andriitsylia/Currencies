@@ -9,8 +9,8 @@ namespace TelegramBot.Services
 {
     public class ReplyKeyboard
     {
-        private const int BUTTONS_IN_ROW = 5;
-        private const int BUTTONS_IN_WEEK = 7;
+        private const int BUTTONS_IN_CURRENCY_ROW = 5;
+        private const int BUTTONS_IN_WEEK_ROW = 7;
 
         public static ReplyKeyboardMarkup MainKeyboard()
         {
@@ -29,9 +29,9 @@ namespace TelegramBot.Services
 
         public static InlineKeyboardMarkup InlineBanksKeyboard(Banks banks)
         {
-            InlineKeyboardMarkup inlineKeyboardMarkup;
             List<List<InlineKeyboardButton>> keyboard = new();
-            foreach (var bank in banks.Items)
+
+            foreach (Bank bank in banks.Items)
             {
                 if (!string.IsNullOrWhiteSpace(bank.Name))
                 {
@@ -41,14 +41,11 @@ namespace TelegramBot.Services
                     });
                 }
             }
-            inlineKeyboardMarkup = new(keyboard);
-
-            return inlineKeyboardMarkup;
+            return new InlineKeyboardMarkup(keyboard);
         }
 
         public static InlineKeyboardMarkup InlineDateKeyboard(DateTime date)
         {
-            InlineKeyboardMarkup inlineKeyboardMarkup;
             List<InlineKeyboardButton> row;
             List<List<InlineKeyboardButton>> keyboard;
 
@@ -91,7 +88,7 @@ namespace TelegramBot.Services
             }
             for (int i = 1; i <= days; i++)
             {
-                if (row.Count == BUTTONS_IN_WEEK)
+                if (row.Count == BUTTONS_IN_WEEK_ROW)
                 {
                     keyboard.Add(row);
                     row = new List<InlineKeyboardButton>();
@@ -100,7 +97,7 @@ namespace TelegramBot.Services
                     text: i.ToString(),
                     callbackData: $"{BotCommand.CMD_DATE} {i}"));
             }
-            for (int i = row.Count + 1; i <= BUTTONS_IN_WEEK; i++)
+            for (int i = row.Count + 1; i <= BUTTONS_IN_WEEK_ROW; i++)
             {
                 row.Add(InlineKeyboardButton.WithCallbackData(
                     text: BotCommand.BUTTON_EMPTY,
@@ -116,19 +113,17 @@ namespace TelegramBot.Services
             };
             keyboard.Add(row);
 
-            inlineKeyboardMarkup = new(keyboard);
-
-            return inlineKeyboardMarkup;
+            return new InlineKeyboardMarkup(keyboard);
         }
 
         public static InlineKeyboardMarkup InlineCurrencyKeyboard(CurrencyListModel currencyList)
         {
-            InlineKeyboardMarkup inlineKeyboardMarkup;
             List<InlineKeyboardButton> row = new();
             List<List<InlineKeyboardButton>> keyboard = new();
+
             foreach (var currency in currencyList.Currencies)
             {
-                if (row.Count == BUTTONS_IN_ROW)
+                if (row.Count == BUTTONS_IN_CURRENCY_ROW)
                 {
                     keyboard.Add(row);
                     row = new List<InlineKeyboardButton>();
@@ -139,9 +134,7 @@ namespace TelegramBot.Services
             }
             keyboard.Add(row);
 
-            inlineKeyboardMarkup = new(keyboard);
-
-            return inlineKeyboardMarkup;
+            return new InlineKeyboardMarkup(keyboard);
         }
 
     }

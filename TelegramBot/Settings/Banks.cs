@@ -1,18 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TelegramBot.Settings
 {
     public class Banks
     {
-        public IEnumerable<Bank> Items { get; set; }
+        public List<Bank> Items { get; set; }
 
         public Bank GetBank(string bankName)
         {
-            return Items.FirstOrDefault(b => b.Name.ToUpper() == bankName.ToUpper());
+            if (string.IsNullOrWhiteSpace(bankName))
+            {
+                throw new ArgumentNullException(nameof(bankName), "Received a null argument");
+            }
+
+            return Items.Find(b => b.Name.ToUpper() == bankName.ToUpper());
         }
     }
 }

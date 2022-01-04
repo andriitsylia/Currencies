@@ -1,27 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using TelegramBot.Settings;
 
 namespace TelegramBot.Models
 {
     public class RatesModel
     {
-        public string Bank { get; set; }
+        public Bank Bank { get; set; }
         public DateTime Date { get; set; }
         public List<RateModel> Rates { get; set; }
 
-        public RatesModel(string bank, DateTime date)
+        public RatesModel(Bank bank, DateTime date)
         {
-            Bank = bank;
+            Bank = bank ?? throw new ArgumentNullException(nameof(bank), "received a null argument");
             Date = date;
             Rates = new List<RateModel>();
-        }
-
-        public RateModel GetRate(string currency)
-        {
-            return Rates.Find(c => c.Currency.ToString().ToUpper() == currency.ToUpper());
         }
 
         public RateModel GetRate(Currency currenncy)

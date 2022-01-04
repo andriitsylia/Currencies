@@ -8,7 +8,7 @@ namespace TelegramBot.Handlers
 {
     public class CommandDateConfirmHandler
     {
-        public static async Task Handler(ITelegramBotClient botClient, Message message, string cmd, CurrentSession currentSession)
+        public static async Task Handler(ITelegramBotClient botClient, Message message, CurrentSession currentSession)
         {
             await BotMessage.SendMessage(
                 botClient,

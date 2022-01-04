@@ -12,7 +12,6 @@ namespace TelegramBot.Handlers
         public static async Task Handler(ITelegramBotClient botClient, Message message, string cmd, CurrentSession currentSession)
         {
             var chatId = message.Chat.Id;
-            var messageText = message.Text;
             string[] command = cmd.Split(" ");
 
             if (currentSession.Bank == null)
