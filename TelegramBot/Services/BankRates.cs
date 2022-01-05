@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using TelegramBot.Constants;
 using TelegramBot.Models;
 using TelegramBot.Settings;
 
@@ -16,7 +17,7 @@ namespace TelegramBot.Services
 
         public BankRates(Bank bank)
         {
-            _bank = bank ?? throw new ArgumentNullException(nameof(bank), "Received a null argument");
+            _bank = bank ?? throw new ArgumentNullException(nameof(bank), BotInfoMessage.NULL_ARGUMENT);
             _client = new HttpClient();
         }
 
@@ -84,8 +85,7 @@ namespace TelegramBot.Services
             }
             else
             {
-                throw new Exception($"HTTP status code {httpResponseMessage.StatusCode}: " +
-                                    $"{Enum.GetName(typeof(HttpStatusCode), httpResponseMessage.StatusCode)}");
+                throw new Exception($"{httpResponseMessage.StatusCode}: {Enum.GetName(typeof(HttpStatusCode), httpResponseMessage.StatusCode)}");
             }
         }
     }

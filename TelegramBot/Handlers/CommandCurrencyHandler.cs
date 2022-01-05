@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using TelegramBot.Constants;
 using TelegramBot.Models;
 using TelegramBot.Services;
 
@@ -18,7 +19,7 @@ namespace TelegramBot.Handlers
         public static async Task Handler(ITelegramBotClient botClient, Message message, string cmd, CurrentSession currentSession)
         {
             var chatId = message.Chat.Id;
-            string[] command = cmd.Split(" ");
+            string[] command = cmd.Split(BotInfoMessage.SPLIT_CHAR);
 
             if (command.Length == 1)
             {
@@ -30,14 +31,14 @@ namespace TelegramBot.Handlers
                     await BotMessage.SendMessage(
                         botClient,
                         chatId,
-                        $"No currency rates on {currentSession.Date.ToString(currentSession.Bank.DateFormat)}");
+                        BotInfoMessage.CURRENCY_NO_RATES + currentSession.Date.ToString(currentSession.Bank.DateFormat));
                     return;
                 }
 
                 await BotMessage.SendMessageKeyboard(
                     botClient,
                     chatId,
-                    "Select the currency",
+                    BotInfoMessage.CURRENCY_SELECT,
                     ReplyKeyboard.InlineCurrencyKeyboard(currencyList));
 
                 return;
@@ -50,7 +51,7 @@ namespace TelegramBot.Handlers
             }
             else
             {
-                await BotMessage.SendMessageMarkdown(botClient, chatId, $"Currency *{command[1].ToUpper()}* is not exist");
+                await BotMessage.SendMessageMarkdown(botClient, chatId, command[1].ToUpper() + BotInfoMessage.CURRENCY_NOT_EXIST);
             }
         }
     }

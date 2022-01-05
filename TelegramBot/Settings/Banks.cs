@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using TelegramBot.Constants;
 
 namespace TelegramBot.Settings
 {
@@ -12,7 +13,7 @@ namespace TelegramBot.Settings
         {
             if (string.IsNullOrWhiteSpace(bankName))
             {
-                throw new ArgumentNullException(nameof(bankName), "Received a null argument");
+                throw new ArgumentNullException(nameof(bankName), BotInfoMessage.NULL_ARGUMENT);
             }
 
             return Items.Find(b => b.Name.ToUpper() == bankName.ToUpper());

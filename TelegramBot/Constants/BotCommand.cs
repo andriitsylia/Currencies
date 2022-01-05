@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-
-namespace TelegramBot.Services
+﻿namespace TelegramBot.Constants
 {
     public class BotCommand
     {
@@ -29,47 +26,5 @@ namespace TelegramBot.Services
         public const string BUTTON_DECREMENT = "-";
         public const string BUTTON_INCREMENT = "+";
         public const string BUTTON_DATECONFIRM = "Confirm date";
-
-        private static string[] commands = {
-            CMD_START,
-            CMD_BANK,
-            CMD_DATE,
-            CMD_DATECONFIRM,
-            CMD_CURRENCY,
-            CMD_HELP
-        };
-
-        private static string[] parameters = {
-            PARAM_DEFAULT,
-            PARAM_TODAY,
-            PARAM_EMPTY,
-            PARAM_YEAR,
-            PARAM_YEAR_DECREMENT,
-            PARAM_YEAR_INCREMENT,
-            PARAM_MONTH,
-            PARAM_MONTH_DECREMENT,
-            PARAM_MONTH_INCREMENT
-        };
-
-        private static string[] buttons = {
-            BUTTON_BANK,
-            BUTTON_DATE,
-            BUTTON_CURRENCY,
-            BUTTON_EMPTY,
-            BUTTON_DECREMENT,
-            BUTTON_INCREMENT,
-            BUTTON_DATECONFIRM
-        };
-
-        private static bool IsCommand(string command) => commands.Contains(command.Trim());
-
-        private static bool IsParameter(string parameter) => parameters.Contains(parameter.Trim());
-
-        private static bool IsButton(string button) => buttons.Contains(button.Trim());
-
-        public static bool IsValidCommand(string command)
-        {
-            return true;
-        }
     }
 }

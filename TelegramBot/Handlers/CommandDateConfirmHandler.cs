@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using TelegramBot.Constants;
 using TelegramBot.Models;
 using TelegramBot.Services;
 
@@ -13,7 +14,7 @@ namespace TelegramBot.Handlers
             await BotMessage.SendMessage(
                 botClient,
                 message.Chat.Id,
-                $"Date {currentSession.Date.ToString(currentSession.Bank.DateFormat)} is selected");
+                currentSession.Date.ToString(currentSession.Bank.DateFormat) + BotInfoMessage.DATE_SELECTED);
         }
     }
 }

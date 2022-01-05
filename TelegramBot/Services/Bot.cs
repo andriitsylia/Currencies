@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
+using TelegramBot.Constants;
 using TelegramBot.Handlers;
 
 namespace TelegramBot.Services
@@ -23,7 +24,7 @@ namespace TelegramBot.Services
             using CancellationTokenSource cts = new();
 
             User me = await botClient.GetMeAsync();
-            Console.Title = me.Username ?? "Telegram currency bot";
+            Console.Title = me.Username ?? BotInfoMessage.BOT_CONSOLE_TITLE;
 
             ReceiverOptions receiverOption = new()
             {
@@ -32,7 +33,7 @@ namespace TelegramBot.Services
             };
             botClient.StartReceiving(MainHandler.HandleUpdateAsync, MainHandler.HandleErrorAsync, receiverOption, cts.Token);
 
-            Console.WriteLine($"Start listening for @{me.Username}");
+            Console.WriteLine(BotInfoMessage.BOT_LISTENING + me.Username);
             Console.ReadLine();
 
             cts.Cancel();

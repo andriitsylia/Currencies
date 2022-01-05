@@ -1,4 +1,5 @@
 ﻿using System;
+using TelegramBot.Constants;
 
 namespace TelegramBot.Models
 {
@@ -10,7 +11,7 @@ namespace TelegramBot.Models
 
         public ReportModel(RateModel rate)
         {
-            Rate = rate ?? throw new ArgumentNullException(nameof(rate), "Received a null argument");
+            Rate = rate ?? throw new ArgumentNullException(nameof(rate), BotInfoMessage.NULL_ARGUMENT);
             Report = Make();
         }
 

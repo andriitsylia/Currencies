@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using TelegramBot.Constants;
 using TelegramBot.Settings;
 
 namespace TelegramBot.Models
@@ -12,7 +13,7 @@ namespace TelegramBot.Models
 
         public RatesModel(Bank bank, DateTime date)
         {
-            Bank = bank ?? throw new ArgumentNullException(nameof(bank), "received a null argument");
+            Bank = bank ?? throw new ArgumentNullException(nameof(bank), BotInfoMessage.NULL_ARGUMENT);
             Date = date;
             Rates = new List<RateModel>();
         }

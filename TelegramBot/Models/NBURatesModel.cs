@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using TelegramBot.Constants;
 
 namespace TelegramBot.Models
 {
@@ -9,7 +10,7 @@ namespace TelegramBot.Models
 
         public NBURatesModel(IEnumerable<NBURateModel> rates)
         {
-            Rates = (List<NBURateModel>)rates ?? throw new ArgumentNullException(nameof(rates), "Received a null argument");
+            Rates = (List<NBURateModel>)rates ?? throw new ArgumentNullException(nameof(rates), BotInfoMessage.NULL_ARGUMENT);
         }
     }
 }

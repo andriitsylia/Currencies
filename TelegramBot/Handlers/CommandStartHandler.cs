@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using TelegramBot.Constants;
 using TelegramBot.Services;
 
 namespace TelegramBot.Handlers
@@ -13,7 +14,7 @@ namespace TelegramBot.Handlers
             await BotMessage.SendMessageMarkdownKeyboard(
                         botClient,
                         message.Chat.Id,
-                        "Select the *Bank*, the *Date* and the *Currency*",
+                        BotInfoMessage.START,
                         ReplyKeyboard.MainKeyboard());
         }
     }

@@ -42,37 +42,37 @@ namespace TelegramBot.Handlers
 
             switch (command[0])
             {
-                case Services.BotCommand.CMD_START:
+                case Constants.BotCommand.CMD_START:
                     await CommandHelpHandler.Handler(botClient, message);
                     await CommandStartHandler.Handler(botClient, message);
                     currentSession = new CurrentSession();
                     break;
 
-                case Services.BotCommand.CMD_BANK:
+                case Constants.BotCommand.CMD_BANK:
                     await CommandBankHandler.Handler(botClient, message, messageText, currentSession);
                     break;
 
-                case Services.BotCommand.CMD_DATE:
+                case Constants.BotCommand.CMD_DATE:
                     await CommandDateHandler.Handler(botClient, message, messageText, currentSession);
                     break;
 
-                case Services.BotCommand.CMD_CURRENCY:
+                case Constants.BotCommand.CMD_CURRENCY:
                     await CommandCurrencyHandler.Handler(botClient, message, messageText, currentSession);
                     break;
 
-                case Services.BotCommand.BUTTON_BANK:
+                case Constants.BotCommand.BUTTON_BANK:
                     await CommandBankHandler.Handler(botClient, message, messageText, currentSession);
                     break;
 
-                case Services.BotCommand.BUTTON_DATE:
+                case Constants.BotCommand.BUTTON_DATE:
                     await CommandDateHandler.Handler(botClient, message, messageText, currentSession);
                     break;
 
-                case Services.BotCommand.BUTTON_CURRENCY:
+                case Constants.BotCommand.BUTTON_CURRENCY:
                     await CommandCurrencyHandler.Handler(botClient, message, messageText, currentSession);
                     break;
 
-                case Services.BotCommand.CMD_HELP:
+                case Constants.BotCommand.CMD_HELP:
                 default:
                     await CommandHelpHandler.Handler(botClient, message);
                     break;
@@ -88,22 +88,22 @@ namespace TelegramBot.Handlers
 
             switch (command[0])
             {
-                case Services.BotCommand.CMD_BANK:
+                case Constants.BotCommand.CMD_BANK:
                     await BotMessage.SendAnswerCallbackQuery(botClient, callbackQuery.Id);
                     await CommandBankHandler.Handler(botClient, message, callbackQuery.Data, currentSession);
                     break;
 
-                case Services.BotCommand.CMD_DATE:
+                case Constants.BotCommand.CMD_DATE:
                     await BotMessage.SendAnswerCallbackQuery(botClient, callbackQuery.Id);
                     await CommandDateHandler.Handler(botClient, message, callbackQuery.Data, currentSession);
                     break;
 
-                case Services.BotCommand.CMD_DATECONFIRM:
+                case Constants.BotCommand.CMD_DATECONFIRM:
                     await BotMessage.SendAnswerCallbackQuery(botClient, callbackQuery.Id);
                     await CommandDateConfirmHandler.Handler(botClient, message, currentSession);
                     break;
 
-                case Services.BotCommand.CMD_CURRENCY:
+                case Constants.BotCommand.CMD_CURRENCY:
                     await BotMessage.SendAnswerCallbackQuery(botClient, callbackQuery.Id, command[1]);
                     await CommandCurrencyHandler.Handler(botClient, message, callbackQuery.Data, currentSession);
                     break;
